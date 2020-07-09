@@ -6,7 +6,7 @@
 
 use std::collections::HashMap;
 
-use crate::data::number_types::traits::Field;
+use crate::algorithm::two_phase::tableau::inverse_maintenance::number_types as inverse_maintenance;
 
 /// Represents a full (including presolved variables, constants, etc.) solution to a linear program.
 ///
@@ -21,7 +21,7 @@ pub struct Solution<F> {
     pub solution_values: Vec<(String, F)>,
 }
 
-impl<F: Field> Solution<F> {
+impl<F: inverse_maintenance::Field> Solution<F> {
     /// Create a new `Solution` instance.
     ///
     /// A plain constructor.

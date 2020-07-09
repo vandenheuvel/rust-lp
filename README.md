@@ -43,8 +43,8 @@ use lp::algorithm::simplex::solve_relaxation;
 use lp::io::import;
 use lp::algorithm::simplex::logic::OptimizationResult;
 
-use num::rational::Ratio;
-use num::BigInt;
+use num_traits::rational::Ratio;
+use num_traits::BigInt;
 use lp::data::linear_program::general_form::GeneralForm;
 use std::convert::TryInto;
 use lp::algorithm::simplex::matrix_provider::MatrixProvider;

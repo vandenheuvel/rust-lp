@@ -1,14 +1,13 @@
 use std::convert::TryInto;
 
-use num::{BigInt, FromPrimitive};
-use num::rational::Ratio;
+use num_traits::{BigInt, FromPrimitive};
+use num_traits::rational::Ratio;
 
 use rust_lp::{BR, R128};
-use rust_lp::algorithm::{OptimizationResult, SolveRelaxation};
 use rust_lp::algorithm::two_phase::matrix_provider::MatrixProvider;
 use rust_lp::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
 use rust_lp::data::linear_program::solution::Solution;
-use rust_lp::data::number_types::traits::{OrderedField, OrderedFieldRef};
+use rust_lp::data::number_types::traits::{OrderedField};
 use rust_lp::io::import;
 
 use super::get_test_file_path;
@@ -17,7 +16,7 @@ fn solve<T: 'static + OrderedField + FromPrimitive>(
     file_name: &str,
 ) -> Solution<T>
 where
-    for<'r> &'r T: OrderedFieldRef<T>,
+    T: OrderedFieldRef<T>,
 {
     let path = get_test_file_path(file_name);
     let mps = import::<T>(&path).unwrap();

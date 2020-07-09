@@ -15,7 +15,7 @@ use crate::data::linear_program::elements::{ConstraintType, VariableType};
 use crate::data::linear_program::elements::Objective;
 use crate::data::linear_program::general_form::GeneralForm;
 use crate::data::linear_program::general_form::Variable as ShiftedVariable;
-use crate::data::number_types::traits::{Field, OrderedField, OrderedFieldRef};
+use crate::data::number_types::traits::{Field, OrderedField};
 use crate::io::error::Inconsistency;
 use crate::io::mps::{Bound, Range};
 use crate::io::mps::BoundType;
@@ -179,7 +179,7 @@ fn order_rows<'a>(
 ///
 /// TODO: Generalize the method to relax the above assumption.
 fn build_columns<'a, 'b, F>(
-    mut unstructured_columns: Vec<UnstructuredColumn<'a, F>>,
+    mut unstructured_columns: Vec<UnstructuredColumn<F>>,
     cost_row_name: &'a str,
     row_index: &HashMap<&'a str, usize>,
 ) -> Result<(Vec<SparseTuple<F>>, Vec<Variable<F>>, Vec<String>), Inconsistency> {
@@ -535,10 +535,8 @@ impl<F> MPS<F> {
     }
 }
 
-impl<OF: 'static> TryInto<GeneralForm<OF>> for MPS<OF>
+impl<OF: OrderedField, NZ> TryInto<GeneralForm<OF, NZ>> for MPS<OF>
 where
-    OF: OrderedField,
-    for<'r> &'r OF: OrderedFieldRef<OF>,
 {
     type Error = Inconsistency;
 
@@ -555,7 +553,7 @@ where
     /// # Errors
     /// 
     /// TODO: When can errors occur?
-    fn try_into(self) -> Result<GeneralForm<OF>, Self::Error> {
+    fn try_into(self) -> Result<GeneralForm<OF, NZ>, Self::Error> {
         let (variable_info, variable_names) = compute_variable_info(
             &self.columns,
             self.column_names,
@@ -597,12 +595,12 @@ where
 /// # Errors
 ///
 /// If there is an inconsistency in bound information, such as a trivial infeasibility.
-fn compute_variable_info<OF: OrderedField>(
+fn compute_variable_info<OF: OrderedField, NZ>(
     columns: &Vec<Variable<OF>>,
     mut column_names: Vec<String>,
     cost_values: Vec<SparseTuple<OF>>,
     bounds: Vec<Bound<OF>>,
-) -> Result<(Vec<ShiftedVariable<OF>>, Vec<String>), Inconsistency> {
+) -> Result<(Vec<ShiftedVariable<OF, NZ>>, Vec<String>), Inconsistency> {
     // Reorder the column names.
     {
         // This set should be a permutation.
@@ -660,8 +658,8 @@ fn compute_variable_info<OF: OrderedField>(
 ///
 /// If there is a trivial infeasibility (a variable has no feasible values).
 /// TODO: Consider changing this into an "this LP is infeasible" return type
-fn process_bounds<OF: OrderedField>(
-    variable_info: &mut Vec<ShiftedVariable<OF>>,
+fn process_bounds<OF: OrderedField, NZ>(
+    variable_info: &mut Vec<ShiftedVariable<OF, NZ>>,
     bounds: Vec<Bound<OF>>,
 ) -> Result<(), Inconsistency> {
     // Variables should not have existing bounds in them, because a default bound will be substituted
@@ -717,9 +715,9 @@ fn process_bounds<OF: OrderedField>(
 ///
 /// Inconsistency error if this variable is no longer be feasible after adding the bound.
 /// TODO: Consider changing this into an "this LP is infeasible" return type
-fn process_bound<OF: OrderedField>(
+fn process_bound<OF: OrderedField, NZ>(
     bound_type: BoundType<OF>,
-    variable: &mut ShiftedVariable<OF>,
+    variable: &mut ShiftedVariable<OF, NZ>,
 ) -> Result<(bool, bool), Inconsistency> {
     match bound_type {
         BoundType::LowerContinuous(value) => {
@@ -804,8 +802,8 @@ fn replace_existing_with<OF: OrderedField>(option: &mut Option<OF>, new_value: O
 ///
 /// * `variables`: Variables with some bounds processed and default bounds not yet substituted.
 /// * `needs_lower_bound`: Whether the variable at that index needs a lower bound.
-fn fill_in_default_lower_bounds<OF: OrderedField>(
-    variables: &mut Vec<ShiftedVariable<OF>>,
+fn fill_in_default_lower_bounds<OF: OrderedField, NZ>(
+    variables: &mut Vec<ShiftedVariable<OF, NZ>>,
     needs_lower_bound: Vec<bool>,
 ) {
     debug_assert_eq!(variables.len(), needs_lower_bound.len());
@@ -1051,7 +1049,7 @@ mod test {
         }];
         let original_nr_rows = 0;
         let ranges = vec![];
-        let columns = compute_columns::<T>(columns, original_nr_rows, &ranges);
+        let columns = compute_columns::<T, T>(columns, original_nr_rows, &ranges);
         assert_eq!(columns, ColumnMajor::new(vec![vec![]], 0, 1));
 
         // No ranges, some values
@@ -1062,7 +1060,7 @@ mod test {
         }];
         let original_nr_rows = 2;
         let ranges = vec![];
-        let columns = compute_columns::<T>(columns, original_nr_rows, &ranges);
+        let columns = compute_columns::<T, T>(columns, original_nr_rows, &ranges);
         assert_eq!(columns, ColumnMajor::new(vec![vec![(0, R32!(123))]], 2, 1));
         let columns = vec![Variable {
             name_index: 0,
@@ -1071,7 +1069,7 @@ mod test {
         }];
         let original_nr_rows = 2;
         let ranges = vec![];
-        let columns = compute_columns::<T>(columns, original_nr_rows, &ranges);
+        let columns = compute_columns::<T, T>(columns, original_nr_rows, &ranges);
         assert_eq!(columns, ColumnMajor::new(vec![vec![(1, R32!(123))]], 2, 1));
 
         // One range, no values
@@ -1082,7 +1080,7 @@ mod test {
         }];
         let original_nr_rows = 1;
         let ranges = vec![(0, R32!(1))];
-        let columns = compute_columns::<T>(columns, original_nr_rows, &ranges);
+        let columns = compute_columns::<T, T>(columns, original_nr_rows, &ranges);
         assert_eq!(columns, ColumnMajor::new(vec![vec![]], 2, 1));
 
         // One range, some values
@@ -1093,7 +1091,7 @@ mod test {
         }];
         let original_nr_rows = 1;
         let ranges = vec![(0, R32!(1))];
-        let columns = compute_columns::<T>(columns, original_nr_rows, &ranges);
+        let columns = compute_columns::<T, T>(columns, original_nr_rows, &ranges);
         assert_eq!(columns, ColumnMajor::new(vec![vec![(0, R32!(1)), (1, R32!(1))]], 2, 1));
 
         // One range, value before range row
@@ -1104,7 +1102,7 @@ mod test {
         }];
         let original_nr_rows = 2;
         let ranges = vec![(1, R32!(1))];
-        let columns = compute_columns::<T>(columns, original_nr_rows, &ranges);
+        let columns = compute_columns::<T, T>(columns, original_nr_rows, &ranges);
         assert_eq!(columns, ColumnMajor::new(vec![vec![(0, R32!(1))]], 3, 1));
 
         // One range, value after range row
@@ -1115,7 +1113,7 @@ mod test {
         }];
         let original_nr_rows = 2;
         let ranges = vec![(0, R32!(1))];
-        let columns = compute_columns::<T>(columns, original_nr_rows, &ranges);
+        let columns = compute_columns::<T, T>(columns, original_nr_rows, &ranges);
         assert_eq!(columns, ColumnMajor::new(vec![vec![(2, R32!(1))]], 3, 1));
     }
 

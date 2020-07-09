@@ -11,8 +11,11 @@ edition = "2018"
 [dependencies]
 num = "0.3.x"
 daggy = "0.7.0"  # Currently only for debug asserts
+ramp = "0.5.9"
+num-traits = "0.2.12"
 
-itertools = "0.9.0"
+itertools = "0.9.x"
+smallvec = "1.4.x"
 
 [features]
 burkardt = []

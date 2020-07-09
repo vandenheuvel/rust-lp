@@ -1,9 +1,8 @@
 use std::convert::TryInto;
 
-use num::{BigInt, ToPrimitive};
-use num::rational::Ratio;
+use num_traits::{BigInt, ToPrimitive};
+use num_traits::rational::Ratio;
 
-use rust_lp::algorithm::{OptimizationResult, SolveRelaxation};
 use rust_lp::algorithm::two_phase::matrix_provider::MatrixProvider;
 use rust_lp::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
 use rust_lp::io::import;

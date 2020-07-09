@@ -7,7 +7,6 @@ use std::convert::Into;
 use std::error::Error;
 use std::fmt;
 use std::io;
-use std::ops::Deref;
 
 /// An `ImportError` is created when an error was encountered during IO or parsing.
 ///
@@ -31,6 +30,17 @@ pub enum Import {
     ///
     /// For example, a bound might be given for a variable which is not known.
     LinearProgram(Inconsistency),
+}
+
+impl From<Parse> for Import {
+    fn from(error: Parse) -> Self {
+        Self::Parse(error)
+    }
+}
+impl From<Inconsistency> for Import {
+    fn from(error: Inconsistency) -> Self {
+        Self::LinearProgram(error)
+    }
 }
 
 impl Display for Import {
@@ -59,11 +69,12 @@ impl Error for Import {
 ///
 /// It may recursively hold more ParseErrors to provide more detail. At the end of this chain, there
 /// may be a file location containing a line number and line, at which the error was caused.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub struct Parse {
     description: String,
-    source: Option<ParseErrorSource>,
+    source: Option<Source>,
 }
+pub type ParseResult<T> = Result<T, Parse>;
 
 impl Display for Parse {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -78,8 +89,8 @@ impl Error for Parse {
     ///
     /// Option<&Error> which may be a `ParseErrorCause`.
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        if let Some(ParseErrorSource::Nested(ref error)) = self.source {
-            Some(error)
+        if let Some(Source::Other(ref error)) = self.source {
+            Some(error.as_ref())
         } else { None }
     }
 
@@ -103,8 +114,8 @@ impl Parse {
     /// # Return value
     ///
     /// * A `ParseError` instance without a cause.
-    pub fn new(description: impl Into<String>) -> Parse {
-        Parse { description: description.into(), source: None, }
+    pub fn new(description: impl Into<String>) -> Self {
+        Self { description: description.into(), source: None, }
     }
 
     /// Create a new `ParseError` instance with a `FileLocation` as a cause.
@@ -117,14 +128,21 @@ impl Parse {
     /// # Return value
     ///
     /// A new `ParseError` instance with a `FileLocation` cause.
-    pub fn with_file_location(
+    pub fn with_location(
         description: impl Into<String>,
         file_location: FileLocation,
-    ) -> Parse {
+    ) -> Self {
         let (line_number, line) = file_location;
-        Parse {
+        Self {
             description: description.into(),
-            source: Some(ParseErrorSource::FileLocation(line_number, line.to_string())),
+            source: Some(Source::FileLocation(line_number, line.to_string())),
+        }
+    }
+
+    pub fn wrap(self, description: impl Into<String>) -> Self {
+        Self {
+            description: description.into(),
+            source: Some(Source::Parse(Box::new(self))),
         }
     }
 
@@ -138,42 +156,29 @@ impl Parse {
     /// # Return value
     ///
     /// A new `ParseError` instance with a `ParseError` cause.
-    pub fn with_cause(description: impl Into<String>, parse_error: Parse) -> Parse {
-        Parse {
+    pub fn wrap_other(source: impl Error + 'static, description: impl Into<String>) -> Self {
+        Self {
             description: description.into(),
-            source: Some(ParseErrorSource::Nested(Box::new(parse_error))),
+            source: Some(Source::Other(Box::new(source))),
         }
     }
 
     /// Get all errors in the chain, leading up to this one.
-    fn chain_description(&self) -> Vec<String> {
-        let mut descriptions = vec![self.to_string()];
-
-        if let Some(ref source) = self.source {
+    fn trace(&self) -> Vec<String> {
+        let mut descriptions = if let Some(ref source) = self.source {
             match source {
-                ParseErrorSource::FileLocation(line_number, line) => {
-                    descriptions.push(format!("\tCaused at line\t{}:\t{}", line_number, line));
-                }
-                ParseErrorSource::Nested(error) => {
-                    descriptions.append(&mut error.chain_description());
-                }
+                Source::FileLocation(line_number, line) => {
+                    vec![format!("Caused at line {}: \t{}", line_number, line)]
+                },
+                Source::Parse(error) => error.trace(),
+                Source::Other(error) => vec![error.to_string()],
             }
-        }
-
-        descriptions
-    }
-
-    /// Get the source of this error.
-    ///
-    /// # Return value
-    ///
-    /// The source of this error, or self.
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        if let Some(ParseErrorSource::Nested(ref error)) = self.source {
-            Some(error.deref() as &dyn Error)
         } else {
-            Some(self as &dyn Error)
-        }
+            Vec::new()
+        };
+
+        descriptions.push(self.to_string());
+        descriptions
     }
 }
 
@@ -181,15 +186,16 @@ impl Parse {
 ///
 /// It can be either a file line number and line contents, or another `ParseError` with its own
 /// description and optionally, a cause.
-#[derive(Debug, Eq, PartialEq)]
-enum ParseErrorSource {
-    FileLocation(u64, String),
-    Nested(Box<Parse>),
+#[derive(Debug)]
+enum Source {
+    FileLocation(usize, String),
+    Parse(Box<Parse>),
+    Other(Box<dyn Error>),
 }
 
 /// A `FileLocation` references a line in the file by the line number of the file as originally
 /// read from the disk. It contains a reference to the line itself.
-pub(super) type FileLocation<'a> = (u64, &'a str);
+pub(super) type FileLocation<'a> = (usize, &'a str);
 
 /// A `LinearProgramError` is thrown when the linear program is inconsistently represented in the
 /// file.

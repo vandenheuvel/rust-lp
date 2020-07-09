@@ -3,6 +3,9 @@
 /// Indicates the start of a comment.
 pub const COMMENT_INDICATOR: &str = "*";
 
+/// Should be on the start of the first line of the non comment lines.
+pub const NAME: &str = "NAME";
+
 /// Indicates a line denoting a change in variable type.
 ///
 /// This change is either from continuous to integer, or vice versa.
