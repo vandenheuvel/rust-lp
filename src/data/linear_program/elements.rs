@@ -2,7 +2,7 @@
 use std::ops::{BitXor, Neg};
 use std::ops::Not;
 
-use num_traits::One;
+use num::One;
 
 use crate::data::linear_program::solution::Solution;
 
