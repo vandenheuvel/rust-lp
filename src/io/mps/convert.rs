@@ -12,7 +12,7 @@ use num::{One, Zero};
 
 use crate::data::linear_algebra::matrix::{ColumnMajor, Order as MatrixOrder, Sparse};
 use crate::data::linear_algebra::SparseTuple;
-use crate::data::linear_algebra::traits::{Element, NotZero};
+use crate::data::linear_algebra::traits::{Element};
 use crate::data::linear_algebra::vector::{DenseVector, Vector};
 use crate::data::linear_program::elements::{ConstraintRelation, RangedConstraintRelation, VariableType};
 use crate::data::linear_program::general_form::GeneralForm;
@@ -24,11 +24,12 @@ use crate::io::mps::BoundType;
 use crate::io::mps::Column;
 use crate::io::mps::Rhs;
 use crate::io::mps::Row;
+use crate::data::number_types::nonzero::Nonzero;
 
 impl<FI, FO: From<FI>> TryInto<GeneralForm<FO>> for MPS<FI>
 where
     FI: Sub<Output=FI> + Abs + Ord + Zero + Display + Clone,
-    FO: NotZero + Zero + One + Neg<Output=FO> + Ord + Element,
+    FO: Nonzero + Zero + One + Neg<Output=FO> + Ord + Element,
     for<'r> FO: Add<&'r FO, Output=FO>,
     for<'r> &'r FO: Neg<Output=FO>,
 {
@@ -88,7 +89,7 @@ where
 /// # Errors
 ///
 /// If there is an inconsistency in bound information, such as a trivial infeasibility.
-fn compute_variable_info<FI, FO: From<FI> + NotZero + Zero + One + Ord + Display + Debug + Clone>(
+fn compute_variable_info<FI, FO: From<FI> + Nonzero + Zero + One + Ord + Display + Debug + Clone>(
     columns: Vec<Column<FI>>,
     cost_values: Vec<SparseTuple<FI>>,
     bounds: Vec<Bound<FI>>,

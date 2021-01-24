@@ -9,6 +9,9 @@ use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use num::{One, Zero};
+use crate::data::number_types::nonzero::NonzeroSigned;
+
+pub mod factorization;
 
 /// The simplex algorithm is defined over the ordered fields. All methods containing algorithmic
 /// logic should be defined to work an ordered field (or a field, if they don't need the ordering).
@@ -16,6 +19,7 @@ use num::{One, Zero};
 /// additional ordering.
 pub trait OrderedField =
     Ord +
+    NonzeroSigned +
     Field +
     Sized +
 ;

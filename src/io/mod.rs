@@ -9,11 +9,12 @@ use std::path::Path;
 
 use num::{One, Zero};
 
-use crate::data::linear_algebra::traits::{Element, NotZero};
+use crate::data::linear_algebra::traits::{Element};
 use crate::data::linear_program::general_form::GeneralForm;
 use crate::data::number_types::rational::Rational64;
 use crate::io::error::{Import, Inconsistency};
 use crate::io::mps::MPS;
+use crate::data::number_types::nonzero::Nonzero;
 
 pub mod error;
 pub mod mps;
@@ -69,7 +70,7 @@ enum DataTypes {
 
 impl<F> TryInto<GeneralForm<F>> for DataTypes
 where
-    F: From<Rational64> + NotZero + Zero + One + Neg<Output=F> + Ord + Element,
+    F: From<Rational64> + Nonzero + Zero + One + Neg<Output=F> + Ord + Element,
     for<'r> F: Add<&'r F, Output=F>,
     for<'r> &'r F: Neg<Output=F>,
 {

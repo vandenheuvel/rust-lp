@@ -12,7 +12,7 @@ pub use dense::Dense as DenseVector;
 pub use sparse::Sparse as SparseVector;
 
 use crate::data::linear_algebra::SparseTuple;
-use crate::data::linear_algebra::traits::NotZero;
+use crate::data::number_types::nonzero::Nonzero;
 
 mod dense;
 mod sparse;
@@ -41,12 +41,12 @@ pub trait Vector<F>: PartialEq + Display + Debug {
         for<'r> &'r F: Mul<&'r G, Output=F>,
     ;
     /// Make a vector longer by one, by adding an extra value at the end of this vector.
-    fn push_value(&mut self, value: F) where F: NotZero;
+    fn push_value(&mut self, value: F) where F: Nonzero;
     /// Set the value at an index.
     ///
     /// Depending on internal representation, this can be an expensive operation (for `SparseVector`
     /// 's, the cost depends on the (lack of) sparsity.
-    fn set(&mut self, index: usize, value: F) where F: NotZero;
+    fn set(&mut self, index: usize, value: F) where F: Nonzero;
     /// Retrieve the value at an index.
     ///
     /// # Returns

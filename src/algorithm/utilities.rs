@@ -2,6 +2,8 @@
 //!
 //! Helper functions for algorithms.
 use std::collections::HashSet;
+use std::cmp::Ordering;
+use crate::data::number_types::nonzero::Nonzero;
 
 /// Reduce the size of the vector by removing values.
 ///
@@ -66,6 +68,41 @@ pub(crate) fn remove_sparse_indices<T>(vector: &mut Vec<(usize, T)>, indices: &[
             false
         }
     });
+}
+
+pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
+    left: impl Iterator<Item=(I, T)> + Sized, right: impl Iterator<Item=(I, T)> + Sized,
+    operation: impl Fn(T, T) -> T,
+) -> Vec<(I, T)> {
+    let mut result = Vec::with_capacity(left.size_hint().0.max(right.size_hint().0));
+
+    let mut left = left.peekable();
+    let mut right = right.peekable();
+
+    while let (Some((left_index, _)), Some((right_index, _))) = (left.peek(), right.peek()) {
+        match left_index.cmp(&right_index) {
+            Ordering::Less => {
+                let (index, value) = left.next().unwrap();
+                result.push((index, value));
+            },
+            Ordering::Equal => {
+                let (left_index, left_value) = left.next().unwrap();
+                let operation_result = operation(left_value, right.next().unwrap().1);
+                if operation_result.is_not_zero() {
+                    result.push((left_index, operation_result));
+                }
+            },
+            Ordering::Greater => {
+                let (index, value) = right.next().unwrap();
+                result.push((index, value));
+            },
+        }
+    }
+
+    result.extend(left);
+    result.extend(right);
+
+    result
 }
 
 #[cfg(test)]

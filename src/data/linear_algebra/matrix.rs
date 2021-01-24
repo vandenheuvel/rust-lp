@@ -12,8 +12,9 @@ use num::{FromPrimitive, ToPrimitive};
 
 use crate::algorithm::utilities::{remove_indices, remove_sparse_indices};
 use crate::data::linear_algebra::{SparseTuple, SparseTupleVec};
-use crate::data::linear_algebra::traits::{NotZero, SparseComparator, SparseElement};
+use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::number_types::traits::Field;
+use crate::data::number_types::nonzero::Nonzero;
 
 /// Indices start at `0`.
 /// TODO(OPTIMIZATION): What data structure is best suited to back this struct? How are allocations
@@ -49,7 +50,7 @@ pub trait Order: Sized {
     ///
     /// Note that the numerics might not be exact due to intermediate casting to floats, for
     /// convenience in other places of the code base.
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NotZero>(
+    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + Nonzero>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>
@@ -88,7 +89,7 @@ impl Order for RowMajor {
         Sparse::from_major_ordered_tuples(rows, nr_rows, nr_columns)
     }
 
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NotZero>(
+    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + Nonzero>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>
@@ -134,7 +135,7 @@ impl Order for ColumnMajor {
         Sparse::from_major_ordered_tuples(columns, nr_columns, nr_rows)
     }
 
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NotZero>(
+    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + Nonzero>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>

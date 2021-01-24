@@ -1,12 +1,10 @@
 //! # Building blocks to describe linear programs.
-use std::cmp::Ordering;
 use std::fmt;
 use std::ops::Mul;
 use std::ops::Not;
 
-use num::Zero;
-
 use crate::data::linear_program::solution::Solution;
+use crate::data::number_types::nonzero::NonzeroSign;
 
 /// When a constraint can not be an equality constraint.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -115,29 +113,6 @@ impl<F> From<&RangedConstraintRelation<F>> for RangedConstraintRelationKind {
     }
 }
 
-/// Sign of a value that is not zero.
-///
-/// When working with values that can't be zero, it is often annoying to have to include a match
-/// case that handles the case where a value is equal to zero (to let it panic).
-#[derive(Clone, Copy)]
-pub enum NonZeroSign {
-    /// x > 0
-    Positive,
-    /// x < 0
-    Negative,
-}
-
-// TODO(CORRECTNESS): NotZero trait?
-impl<OF: Zero + Ord> From<&OF> for NonZeroSign {
-    fn from(value: &OF) -> Self {
-        match value.cmp(&OF::zero()) {
-            Ordering::Greater => NonZeroSign::Positive,
-            Ordering::Less => NonZeroSign::Negative,
-            Ordering::Equal => unreachable!("Value should not be zero at this point."),
-        }
-    }
-}
-
 /// Direction of a bound.
 ///
 /// Is used more generally in the case where the three variants of the `ConstraintType` don't suit
@@ -170,13 +145,13 @@ impl Not for BoundDirection {
 ///
 /// * `3 x >= 2 <=> x >= 2 / 3`
 /// * `-3 x >= -2 <=> x <= 2 / 3`
-impl Mul<NonZeroSign> for BoundDirection {
+impl Mul<NonzeroSign> for BoundDirection {
     type Output = Self;
 
-    fn mul(self, other: NonZeroSign) -> Self::Output {
+    fn mul(self, other: NonzeroSign) -> Self::Output {
         match (self, other) {
-            (Self::Upper, NonZeroSign::Positive) | (Self::Lower, NonZeroSign::Negative) => Self::Upper,
-            (Self::Lower, NonZeroSign::Positive) | (Self::Upper, NonZeroSign::Negative) => Self::Lower,
+            (Self::Upper, NonzeroSign::Positive) | (Self::Lower, NonzeroSign::Negative) => Self::Upper,
+            (Self::Lower, NonzeroSign::Positive) | (Self::Upper, NonzeroSign::Negative) => Self::Lower,
         }
     }
 }

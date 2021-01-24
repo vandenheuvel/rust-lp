@@ -8,5 +8,8 @@
 //! A downside is that the algorithm doesn't have access to the finite representations of e.g.
 //! floats, which is potentially limiting.
 pub mod traits;
-pub mod rational;
+
 pub mod binary;
+pub mod integer;
+pub mod nonzero;
+pub mod rational;

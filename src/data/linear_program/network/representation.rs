@@ -11,10 +11,11 @@ use crate::algorithm::two_phase::matrix_provider::filter::generic_wrapper::IntoF
 use crate::algorithm::utilities::remove_sparse_indices;
 use crate::data::linear_algebra::matrix::{ColumnMajor, Order, Sparse as SparseMatrix};
 use crate::data::linear_algebra::SparseTuple;
-use crate::data::linear_algebra::traits::{NotZero, SparseComparator, SparseElement};
+use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::linear_algebra::vector::{DenseVector, Vector};
 use crate::data::number_types::rational::RationalBig;
 use crate::data::number_types::traits::Field;
+use crate::data::number_types::nonzero::Nonzero;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArcIncidenceMatrix {
@@ -143,7 +144,7 @@ pub enum ArcDirection {
     Outgoing,
 }
 
-impl NotZero for ArcDirection {
+impl Nonzero for ArcDirection {
     fn is_not_zero(&self) -> bool {
         true
     }

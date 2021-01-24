@@ -12,8 +12,9 @@ use crate::algorithm::two_phase::tableau::inverse_maintenance::{ColumnComputatio
 use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::{BasisInverse, RemoveBasisPart};
 use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::LUDecomposition;
 use crate::algorithm::utilities::remove_indices;
-use crate::data::linear_algebra::traits::{NotZero, SparseElement};
+use crate::data::linear_algebra::traits::{SparseElement};
 use crate::data::linear_algebra::vector::{SparseVector, Vector};
+use crate::data::number_types::nonzero::Nonzero;
 
 /// Explicit row-major sparse representation of the basis inverse.
 #[derive(Eq, PartialEq, Debug)]

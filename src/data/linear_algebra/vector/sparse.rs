@@ -16,8 +16,8 @@ use num::{One, Zero};
 use crate::algorithm::utilities::remove_sparse_indices;
 use crate::data::linear_algebra::SparseTuple;
 use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
-use crate::data::linear_algebra::traits::NotZero;
 use crate::data::linear_algebra::vector::{DenseVector, Vector};
+use crate::data::number_types::nonzero::Nonzero;
 
 /// A sparse vector using a `Vec` with (row, value) combinations as back-end. Indices start at
 /// `0`.
@@ -277,7 +277,7 @@ where
     /// Multiply each element of the vector by a value.
     pub fn element_wise_multiply(&mut self, value: &F)
     where
-        for<'r> F: NotZero + MulAssign<&'r F>,
+        for<'r> F: Nonzero + MulAssign<&'r F>,
     {
         debug_assert!(value.borrow().is_not_zero());
 
@@ -290,7 +290,7 @@ where
     /// Divide each element of the vector by a value.
     pub fn element_wise_divide(&mut self, value: &F)
     where
-       for<'r> F: NotZero + DivAssign<&'r F>,
+       for<'r> F: Nonzero + DivAssign<&'r F>,
     {
         debug_assert!(value.borrow().is_not_zero());
 

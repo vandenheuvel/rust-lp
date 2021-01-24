@@ -5,7 +5,7 @@
 use std::iter::Iterator;
 
 use crate::data::linear_algebra::traits::SparseElement;
-use crate::data::linear_program::elements::{BoundDirection, LinearProgramType, NonZeroSign, RangedConstraintRelation};
+use crate::data::linear_program::elements::{BoundDirection, LinearProgramType, RangedConstraintRelation};
 use crate::data::linear_program::general_form::{GeneralForm, RemovedVariable};
 use crate::data::linear_program::general_form::presolve::counters::Counters;
 use crate::data::linear_program::general_form::presolve::queues::Queues;
@@ -16,6 +16,10 @@ mod rule;
 mod queues;
 pub(super) mod updates;
 mod counters;
+pub(super) mod scale;
+pub use scale::Scalable as Prescalable;
+use crate::data::number_types::nonzero::NonzeroSign;
+use crate::data::number_types::nonzero::sign::Signed;
 
 /// Container data structure to keep track of presolve status.
 ///
@@ -221,7 +225,7 @@ where
                 continue;
             }
 
-            let bound_to_edit = direction * NonZeroSign::from(coefficient);
+            let bound_to_edit = direction * coefficient.signum();
             if let Some(ref mut bound) = match bound_to_edit {
                 BoundDirection::Lower => &mut self.activity_bounds[row].0,
                 BoundDirection::Upper => &mut self.activity_bounds[row].1,
@@ -251,7 +255,7 @@ where
             // TODO(ARCHITECTURE): Avoid This clone
             .map(|(i, v)| (i, v.clone())).collect::<Vec<_>>();
         for (constraint, coefficient) in constraints_to_check {
-            let activity_direction = direction * NonZeroSign::from(&coefficient);
+            let activity_direction = direction * coefficient.signum();
             let counter = match activity_direction {
                 BoundDirection::Lower => &mut self.counters.activity[constraint].0,
                 BoundDirection::Upper => &mut self.counters.activity[constraint].1,
