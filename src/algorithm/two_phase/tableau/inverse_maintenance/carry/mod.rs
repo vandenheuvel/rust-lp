@@ -209,13 +209,13 @@ where
     /// * `basis_inverse_rows`: A basis inverse that represents a basic feasible solution.
     /// * `provider`: Matrix provider.
     /// * `basis`: Indices of the basis elements.
-    fn create_minus_pi_from_artificial<'a, MP: MatrixProvider>(
+    fn create_minus_pi_from_artificial<'provider, MP: MatrixProvider>(
         basis_inverse: &BI,
-        provider: &'a MP,
+        provider: &'provider MP,
         basis: &[usize],
     ) -> DenseVector<F>
     where
-        F: ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'a>>,
+        F: ops::Column<<MP::Column<'provider> as Column>::F> + ops::Cost<MP::Cost<'provider>>,
     {
         let m = basis_inverse.m();
         debug_assert_eq!(provider.nr_rows(), m);
@@ -253,13 +253,13 @@ where
     /// * `basis`: Basis indices (elements are already shifted, no compensation for the artificial
     /// variables is needed).
     /// * `b`: Constraint values with respect to this basis.
-    fn create_minus_obj_from_artificial<'a, MP: MatrixProvider>(
-        provider: &'a MP,
+    fn create_minus_obj_from_artificial<'provider, MP: MatrixProvider>(
+        provider: &'provider MP,
         basis: &[usize],
         b: &DenseVector<F>,
     ) -> F
     where
-        F: ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'a>>,
+        F: ops::Column<<MP::Column<'provider> as Column>::F> + ops::Cost<MP::Cost<'provider>>,
     {
         let mut objective = F::zero();
         for row in 0..provider.nr_rows() {
@@ -423,9 +423,9 @@ where
         }
     }
 
-    fn from_basis<MP: MatrixProvider>(basis: &[usize], provider: &MP) -> Self
+    fn from_basis<'provider, MP: MatrixProvider>(basis: &[usize], provider: &'provider MP) -> Self
     where
-        Self::F: ops::Column<<MP::Column as Column>::F>,
+        Self::F: ops::Column<<MP::Column<'provider> as Column>::F>,
     {
         let columns = basis.iter().map(|&j| provider.column(j)).collect::<Vec<_>>();
         let _basis_inverse = BI::invert(columns);
@@ -449,7 +449,7 @@ where
         nr_artificial: usize,
     ) -> Self
     where
-        F: ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'provider>>,
+        F: ops::Column<<MP::Column<'provider> as Column>::F> + ops::Cost<MP::Cost<'provider>>,
     {
         debug_assert_eq!(artificial.m(), provider.nr_rows());
 
@@ -477,7 +477,10 @@ where
         nr_artificial: usize,
     ) -> Self
     where
-        Self::F: ops::Column<<<MP as MatrixProvider>::Column as Column>::F> + ops::Cost<MP::Cost<'provider>>,
+        Self::F:
+            ops::Column<<<MP as MatrixProvider>::Column<'provider> as Column>::F> +
+            ops::Cost<MP::Cost<'provider>>
+        ,
     {
         debug_assert_eq!(artificial.basis_indices.len(), rows_removed.nr_rows() + rows_removed.filtered_rows().len());
 
@@ -615,7 +618,10 @@ where
         nr_artificial: usize,
     ) -> Self
     where
-        Self::F: ops::Column<<<MP as MatrixProvider>::Column as Column>::F> + ops::Cost<MP::Cost<'provider>>,
+        Self::F:
+            ops::Column<<<MP as MatrixProvider>::Column<'provider> as Column>::F> +
+            ops::Cost<MP::Cost<'provider>>
+        ,
     {
         debug_assert_eq!(artificial.basis_indices.len(), rows_removed.nr_rows() + rows_removed.filtered_rows().len());
 

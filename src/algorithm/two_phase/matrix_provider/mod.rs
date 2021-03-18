@@ -41,7 +41,7 @@ pub trait MatrixProvider {
     ///  lifetime parameter. Keep an eye on <https://github.com/rust-lang/rust/issues/44265>.
     /// TODO(ARCHITECTURE): When specializing on the generic arguments of trait methods is possible,
     ///  the columns no longer need to be ordered necessarily and the bound can be removed here.
-    type Column: Column + OrderedColumn;
+    type Column<'a>: Column + OrderedColumn;
     /// Cost row type.
     ///
     /// This type will often be of the form `Option<_>` so to not have to store any zero values, the
@@ -60,7 +60,7 @@ pub trait MatrixProvider {
     /// # Return value
     ///
     /// A sparse vector.
-    fn column(&self, j: usize) -> Self::Column;
+    fn column(&self, j: usize) -> Self::Column<'_>;
 
     /// Cost of a variable.
     ///

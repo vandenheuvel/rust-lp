@@ -18,7 +18,7 @@ pub trait Filtered: MatrixProvider {
 /// Derive a variant of the matrix provider that has rows removed from it.
 pub trait ToFiltered: MatrixProvider {
     /// The resulting matrix provider type.
-    type Filtered<'provider>: Filtered<Column: Column<F=<Self::Column as Column>::F>>;
+    type Filtered<'provider>: Filtered<Column: Column<F=<Self::Column<'provider> as Column>::F>>;
 
     /// Derive a variant of the matrix provider that has rows removed from it.
     ///
@@ -27,18 +27,4 @@ pub trait ToFiltered: MatrixProvider {
     /// * `rows_to_filter`: Indices of rows to remove from the problem. Indices are relative to the
     /// original problem.
     fn to_filtered(&self, rows_to_filter: Vec<usize>) -> Self::Filtered<'_>;
-}
-
-/// Convert into a variant of the matrix provider that has rows removed from it.
-pub trait IntoFiltered: MatrixProvider {
-    /// The resulting matrix provider type.
-    type Filtered: Filtered<Column: Column<F=<Self::Column as Column>::F>>;
-
-    /// Convert into a variant of the matrix provider that has rows removed from it.
-    ///
-    /// # Arguments
-    ///
-    /// * `rows_to_filter`: Indices of rows to remove from the problem. Indices are relative to the
-    /// original problem.
-    fn into_filtered(self, rows_to_filter: Vec<usize>) -> Self::Filtered;
 }

@@ -123,11 +123,11 @@ impl<F> MatrixProvider for Primal<F>
 where
     F: SparseElement<F> + Zero,
 {
-    type Column = Column;
+    type Column<'a> = Column;
     type Cost<'a> = Cost;
     type Rhs = F;
 
-    fn column(&self, j: usize) -> Self::Column {
+    fn column(&self, j: usize) -> Self::Column<'_> {
         debug_assert!(j < self.nr_columns());
 
         if j < self.nr_edges() {

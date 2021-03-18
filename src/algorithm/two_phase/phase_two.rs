@@ -18,12 +18,12 @@ use crate::algorithm::two_phase::tableau::kind::non_artificial::NonArtificial;
 ///
 /// An `OptimizationResult` indicating whether or not the problem has a finite optimum. It cannot be
 /// infeasible, as a feasible solution is needed to start using this method.
-pub(crate) fn primal<IM, MP, PR>(
-    tableau: &mut Tableau<IM, NonArtificial<MP>>,
+pub(crate) fn primal<'provider, IM, MP, PR>(
+    tableau: &mut Tableau<IM, NonArtificial<'provider, MP>>,
 ) -> OptimizationResult<IM::F>
 where
-    IM: InverseMaintener<F: im_ops::InternalHR + im_ops::Column<<MP::Column as Column>::F>>,
-    for<'r> IM::F: im_ops::Cost<MP::Cost<'r>>,
+    IM: InverseMaintener<F: im_ops::InternalHR + im_ops::Column<<MP::Column<'provider> as Column>::F>>,
+    IM::F: im_ops::Cost<MP::Cost<'provider>>,
     MP: MatrixProvider,
     PR: PivotRule,
 {

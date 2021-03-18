@@ -33,11 +33,11 @@ where
         self.column_to_row.len()
     }
 }
-impl<'a, MP> Kind for Partially<'a, MP>
+impl<'provider, MP> Kind for Partially<'provider, MP>
 where
     MP: MatrixProvider<Column: IdentityColumn>,
 {
-    type Column = MP::Column;
+    type Column = MP::Column<'provider>;
     type Cost = Cost;
 
     /// Coefficient of variable `j` in the objective function.
@@ -105,7 +105,7 @@ where
 impl<'provider, IM, MP> Tableau<IM, Partially<'provider, MP>>
 where
     IM: InverseMaintener<F:
-        im_ops::Column<<MP::Column as Column>::F> +
+        im_ops::Column<<MP::Column<'provider> as Column>::F> +
         im_ops::Rhs<MP::Rhs> +
     >,
     MP: MatrixProvider,

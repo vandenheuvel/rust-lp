@@ -26,7 +26,7 @@ impl<'provider, MP> Kind for NonArtificial<'provider, MP>
 where
     MP: MatrixProvider,
 {
-    type Column = MP::Column;
+    type Column = MP::Column<'provider>;
     type Cost = MP::Cost<'provider>;
 
     /// Coefficient of variable `j` in the objective function.
@@ -74,7 +74,7 @@ impl<'provider, IM, MP> Tableau<IM, NonArtificial<'provider, MP>>
 where
     IM: InverseMaintener<F:
         im_ops::InternalHR +
-        im_ops::Column<<MP::Column as Column>::F> +
+        im_ops::Column<<MP::Column<'provider> as Column>::F> +
         im_ops::Cost<MP::Cost<'provider>> +
     >,
     MP: MatrixProvider,
@@ -170,7 +170,11 @@ where
 
 impl<'provider, IM, MP> Tableau<IM, NonArtificial<'provider, MP>>
 where
-    IM: InverseMaintener<F: im_ops::InternalHR + im_ops::Column<<MP::Column as Column>::F> + im_ops::Cost<MP::Cost<'provider>>>,
+    IM: InverseMaintener<F:
+        im_ops::InternalHR +
+        im_ops::Column<<MP::Column<'provider> as Column>::F> +
+        im_ops::Cost<MP::Cost<'provider>> +
+    >,
     MP: Filtered,
 {
     /// Create a `Tableau` from an artificial tableau while removing some rows.

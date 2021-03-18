@@ -27,11 +27,11 @@ where
     MP: MatrixProvider<Column: IdentityColumn + IntoFilteredColumn>,
 {
     // TODO(ENHANCEMENT): Specialize for MatrixProviders that can be filtered directly.
-    default fn solve_relaxation<IM>(&self) -> OptimizationResult<IM::F>
+    default fn solve_relaxation<'provider, IM>(&'provider self) -> OptimizationResult<IM::F>
     where
         IM: InverseMaintener<F:
             im_ops::InternalHR +
-            im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
+            im_ops::Column<<<Self as MatrixProvider>::Column<'provider> as Column>::F> +
             im_ops::Cost<ArtificialCost> +
             im_ops::Rhs<MP::Rhs> +
         >,
@@ -84,11 +84,11 @@ where
     //  because of limitations of the specialization feature; overlap is not (yet) allowed.
     MP: MatrixProvider<Column: IdentityColumn + IntoFilteredColumn>,
 {
-    fn solve_relaxation<IM>(&self) -> OptimizationResult<IM::F>
+    fn solve_relaxation<'provider, IM>(&'provider self) -> OptimizationResult<IM::F>
     where
         IM: InverseMaintener<F:
             im_ops::InternalHR +
-            im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
+            im_ops::Column<<<Self as MatrixProvider>::Column<'provider> as Column>::F> +
             im_ops::Rhs<Self::Rhs> +
         >,
         for<'r> IM::F: im_ops::Cost<MP::Cost<'r>>,

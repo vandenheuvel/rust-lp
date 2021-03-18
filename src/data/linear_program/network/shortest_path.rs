@@ -64,11 +64,11 @@ impl<F: 'static> MatrixProvider for Primal<F>
 where
     F: Field,
 {
-    type Column = ArcIncidenceColumn;
+    type Column<'a> = ArcIncidenceColumn;
     type Cost<'a> = &'a F;
     type Rhs = Binary;
 
-    fn column(&self, j: usize) -> Self::Column {
+    fn column(&self, j: usize) -> Self::Column<'_> {
         debug_assert!(j < self.nr_edges());
 
         ArcIncidenceColumn(self.arc_incidence_matrix.column(j))

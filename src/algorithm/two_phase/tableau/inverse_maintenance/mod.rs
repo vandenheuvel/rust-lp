@@ -88,9 +88,9 @@ pub trait InverseMaintener: Display + Sized {
     /// * `basis`: Indices of columns that are to be in the basis. Should match the number of rows
     /// of the provider. Values should be unique, could have been a set.
     /// * `provider`: Problem representation.
-    fn from_basis<MP: MatrixProvider>(basis: &[usize], provider: &MP) -> Self
+    fn from_basis<'provider, MP: MatrixProvider>(basis: &[usize], provider: &'provider MP) -> Self
     where
-        Self::F: ops::Column<<MP::Column as Column>::F>,
+        Self::F: ops::Column<<MP::Column<'provider> as Column>::F>,
     ;
 
     /// Create a basis inverse when the basis indices and their pivot rows are known.
@@ -121,7 +121,7 @@ pub trait InverseMaintener: Display + Sized {
         nr_artificial: usize,
     ) -> Self
     where
-        Self::F: ops::InternalHR + ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'provider>>,
+        Self::F: ops::InternalHR + ops::Column<<MP::Column<'provider> as Column>::F> + ops::Cost<MP::Cost<'provider>>,
     ;
 
     /// When a previous basis inverse representation was used to find a basic feasible solution.
@@ -133,13 +133,16 @@ pub trait InverseMaintener: Display + Sized {
     /// * `artificial`: Indices of rows where an artificial variable is needed.
     /// * `provider`: Original problem representation.
     /// * `basis`: (row index, column index) tuples of given basis variables.
-    fn from_artificial_remove_rows<'a, MP: Filtered>(
+    fn from_artificial_remove_rows<'provider, MP: Filtered>(
         artificial: Self,
-        rows_removed: &'a MP,
+        rows_removed: &'provider MP,
         nr_artificial: usize,
     ) -> Self
     where
-        Self::F: ops::Column<<<MP as MatrixProvider>::Column as Column>::F> + ops::Cost<MP::Cost<'a>>,
+        Self::F:
+            ops::Column<<<MP as MatrixProvider>::Column<'provider> as Column>::F> +
+            ops::Cost<MP::Cost<'provider>>
+        ,
     ;
 
     /// Update the basis by representing one row reduction operation.

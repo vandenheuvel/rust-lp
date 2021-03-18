@@ -69,7 +69,7 @@ where
 impl<MP: 'static> ToFiltered for MP
 where
     MP: MatrixProvider<Column: IntoFilteredColumn>,
-    <<MP as MatrixProvider>::Column as IntoFilteredColumn>::Filtered: OrderedColumn,
+    for<'r> <<MP as MatrixProvider>::Column<'r> as IntoFilteredColumn>::Filtered: OrderedColumn,
 {
     type Filtered<'provider> = RemoveRows<'provider, MP>;
 
@@ -225,11 +225,11 @@ impl<'provider, MP> MatrixProvider for RemoveRows<'provider, MP>
 where
     MP: MatrixProvider<Column: IntoFilteredColumn>,
 {
-    type Column = <MP::Column as IntoFilteredColumn>::Filtered;
+    type Column<'a> = <MP::Column<'a> as IntoFilteredColumn>::Filtered;
     type Cost<'a> = MP::Cost<'a>;
     type Rhs = MP::Rhs;
 
-    fn column(&self, j: usize) -> Self::Column {
+    fn column(&self, j: usize) -> Self::Column<'_> {
         debug_assert!(j < self.nr_columns());
 
         self.provider.column(j).into_filtered(&self.rows_to_skip)
@@ -303,7 +303,7 @@ impl<'provider, MP> FeasibilityLogic for RemoveRows<'provider, MP>
 where
     MP: MatrixProvider<Column: IntoFilteredColumn> + FeasibilityLogic,
 {
-    fn is_feasible(&self, j: usize, value: <MP::Column as Column>::F) -> bool {
+    fn is_feasible(&self, j: usize, value: <MP::Column<'_> as Column>::F) -> bool {
         debug_assert!(j < self.nr_columns());
 
         self.provider.is_feasible(j, value)
@@ -312,8 +312,8 @@ where
     fn closest_feasible(
         &self,
         j: usize,
-        value: <MP::Column as Column>::F,
-    ) -> (Option<<MP::Column as Column>::F>, Option<<MP::Column as Column>::F>) {
+        value: <MP::Column<'_> as Column>::F,
+    ) -> (Option<<MP::Column<'_> as Column>::F>, Option<<MP::Column<'_> as Column>::F>) {
         debug_assert!(j < self.nr_columns());
 
         self.provider.closest_feasible(j, value)
@@ -323,7 +323,7 @@ where
 impl<'provider, MP> Display for RemoveRows<'provider, MP>
 where
     MP: MatrixProvider<Column: IntoFilteredColumn>,
-    <<MP as MatrixProvider>::Column as IntoFilteredColumn>::Filtered: OrderedColumn,
+    <<MP as MatrixProvider>::Column<'provider> as IntoFilteredColumn>::Filtered: OrderedColumn,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let width = 8;

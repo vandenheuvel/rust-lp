@@ -301,11 +301,11 @@ where
     F: Field + SparseElement<F>,
     for<'r> &'r F: FieldRef<F>,
 {
-    type Column = Column<F>;
-    type Cost<'a> = Option<&'a <Self::Column as ColumnTrait>::F>;
+    type Column<'a> = Column<F>;
+    type Cost<'a> = Option<&'a <Self::Column<'a> as ColumnTrait>::F>;
     type Rhs = F;
 
-    fn column(&self, j: usize) -> Self::Column {
+    fn column(&self, j: usize) -> Self::Column<'_> {
         debug_assert!(j < self.nr_columns());
 
         // TODO(ARCHITECTURE): Can the +/- F::one() constants be avoided? They might be large and

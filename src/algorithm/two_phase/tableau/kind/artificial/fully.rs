@@ -23,7 +23,7 @@ impl<'provider, MP> Kind for Fully<'provider, MP>
 where
     MP: MatrixProvider<Column: Column + IdentityColumn>,
 {
-    type Column = MP::Column;
+    type Column = MP::Column<'provider>;
     type Cost = Cost;
 
     fn initial_cost_value(&self, j: usize) -> Self::Cost {
