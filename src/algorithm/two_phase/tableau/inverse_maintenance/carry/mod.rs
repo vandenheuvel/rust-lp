@@ -211,13 +211,13 @@ where
     /// * `basis_inverse_rows`: A basis inverse that represents a basic feasible solution.
     /// * `provider`: Matrix provider.
     /// * `basis`: Indices of the basis elements.
-    fn create_minus_pi_from_artificial<'a, MP: MatrixProvider>(
+    fn create_minus_pi_from_artificial<'provider, MP: MatrixProvider>(
         basis_inverse: &BI,
-        provider: &'a MP,
+        provider: &'provider MP,
         basis: &[usize],
     ) -> DenseVector<F>
     where
-        F: ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'a>>,
+        F: ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'provider>>,
     {
         let m = basis_inverse.m();
         debug_assert_eq!(provider.nr_rows(), m);
@@ -255,13 +255,13 @@ where
     /// * `basis`: Basis indices (elements are already shifted, no compensation for the artificial
     /// variables is needed).
     /// * `b`: Constraint values with respect to this basis.
-    fn create_minus_obj_from_artificial<'a, MP: MatrixProvider>(
-        provider: &'a MP,
+    fn create_minus_obj_from_artificial<'provider, MP: MatrixProvider>(
+        provider: &'provider MP,
         basis: &[usize],
         b: &DenseVector<F>,
     ) -> F
     where
-        F: ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'a>>,
+        F: ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'provider>>,
     {
         let mut objective = F::zero();
         for row in 0..provider.nr_rows() {
@@ -425,12 +425,12 @@ where
         }
     }
 
-    fn from_basis<'a, MP: MatrixProvider>(basis: &[usize], provider: &'a MP) -> Self
+    fn from_basis<'provider, MP: MatrixProvider>(basis: &[usize], provider: &'provider MP) -> Self
     where
         Self::F:
             ops::Column<<MP::Column as Column>::F> +
             ops::Rhs<MP::Rhs> +
-            ops::Cost<MP::Cost<'a>> +
+            ops::Cost<MP::Cost<'provider>> +
             ops::Column<MP::Rhs> +
         ,
         MP::Rhs: 'static,
@@ -462,15 +462,15 @@ where
         }
     }
 
-    fn from_basis_pivots<'a, MP: MatrixProvider>(
+    fn from_basis_pivots<'provider, MP: MatrixProvider>(
         basis_columns: &[(usize, usize)],
-        provider: &'a MP,
+        provider: &'provider MP,
     ) -> Self
     where
         Self::F:
             ops::Column<<MP::Column as Column>::F> +
             ops::Rhs<MP::Rhs> +
-            ops::Cost<MP::Cost<'a>> +
+            ops::Cost<MP::Cost<'provider>> +
             ops::Column<MP::Rhs> +
         ,
         MP::Rhs: 'static + ColumnNumber,

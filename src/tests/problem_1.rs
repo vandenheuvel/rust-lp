@@ -404,10 +404,7 @@ pub fn artificial_tableau_form<MP: MatrixProvider<Column: ColumnTrait<F=T>, Rhs=
 
 pub fn tableau_form<MP: MatrixProvider<Column: ColumnTrait<F=T>>>(
     provider: &MP,
-) -> Tableau<Carry<S, BasisInverseRows<S>>, NonArtificial<MP>>
-where
-    for<'a> S: im_ops::Cost<MP::Cost<'a>>,
-{
+) -> Tableau<Carry<S, BasisInverseRows<S>>, NonArtificial<MP>> {
     let carry = {
         let minus_objective = RB!(-58);
         let minus_pi = DenseVector::from_test_data(vec![4, -13, 12, 0]);

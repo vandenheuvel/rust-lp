@@ -86,7 +86,7 @@ where
     MP: MatrixProvider<Column: IdentityColumn + IntoFilteredColumn>,
     MP::Rhs: 'static + ColumnNumber,
 {
-    fn solve_relaxation<IM>(&self) -> OptimizationResult<IM::F>
+    fn solve_relaxation<'provider, IM>(&'provider self) -> OptimizationResult<IM::F>
     where
         IM: InverseMaintener<F:
             im_ops::InternalHR +

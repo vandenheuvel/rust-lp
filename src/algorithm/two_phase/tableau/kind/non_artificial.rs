@@ -174,7 +174,11 @@ where
 
 impl<'provider, IM, MP> Tableau<IM, NonArtificial<'provider, MP>>
 where
-    IM: InverseMaintener<F: im_ops::InternalHR + im_ops::Column<<MP::Column as Column>::F> + im_ops::Cost<MP::Cost<'provider>>>,
+    IM: InverseMaintener<F:
+        im_ops::InternalHR +
+        im_ops::Column<<MP::Column as Column>::F> +
+        im_ops::Cost<MP::Cost<'provider>> +
+    >,
     MP: Filtered,
 {
     /// Create a `Tableau` from an artificial tableau while removing some rows.
@@ -194,7 +198,9 @@ where
         mut basis: HashSet<usize>,
         provider: &'provider MP,
     ) -> Self {
-        debug_assert!(basis.iter().all(|&v| v >= nr_artificial || provider.filtered_rows().contains(&v)));
+        debug_assert!(basis.iter().all(|&v|
+            v >= nr_artificial || provider.filtered_rows().contains(&v)
+        ));
 
         for &row in provider.filtered_rows() {
             let was_there = basis.remove(&inverse_maintainer.basis_column_index_for_row(row));

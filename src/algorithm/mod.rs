@@ -25,7 +25,7 @@ pub trait SolveRelaxation: MatrixProvider {
     /// # Return value
     /// 
     /// Whether the problem is feasible, and if so, a solution if the problem is bounded.
-    fn solve_relaxation<IM>(&self) -> OptimizationResult<IM::F>
+    fn solve_relaxation<'provider, IM>(&'provider self) -> OptimizationResult<IM::F>
     where
         IM: InverseMaintener<F:
             im_ops::InternalHR +
