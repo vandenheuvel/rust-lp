@@ -31,10 +31,10 @@ pub trait SolveRelaxation: MatrixProvider {
             im_ops::InternalHR +
             im_ops::Column<<Self::Column as Column>::F> +
             im_ops::Cost<ArtificialCost> +
+            im_ops::Cost<Self::Cost<'provider>> +
             im_ops::Rhs<Self::Rhs> +
             im_ops::Column<Self::Rhs> +
         >,
-        for<'r> IM::F: im_ops::Cost<Self::Cost<'r>>,
     ;
 }
 

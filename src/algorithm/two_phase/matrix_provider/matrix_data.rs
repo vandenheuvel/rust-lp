@@ -514,17 +514,12 @@ where
 #[allow(clippy::type_repetition_in_bounds)]
 impl<F> ColumnTrait for Column<F>
 where
-    // TODO(ARCHITECTURE): Once GATs are more developed, it could be possible to replace this bound
-    //  with a where clause on the method. Then, the 'static bound doesn't propagate through the
-    //  entire codebase. Once this is done, remove the `clippy::type_repetition_in_bounds`
-    //  annotation.
-    F: 'static,
     F: Field,
 {
     type F = F;
-    type Iter<'a> = impl Iterator<Item = &'a SparseTuple<F>> + Clone;
+    type Iter<'a, G: 'a> = impl Iterator<Item = &'a SparseTuple<G>> + Clone;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter<'_, Self::F> {
         match self {
             Column::Sparse {
                 constraint_values,

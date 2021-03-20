@@ -33,9 +33,9 @@ pub struct IdentityColumnStruct(pub (usize, One));
 
 impl Column for IdentityColumnStruct {
     type F = One;
-    type Iter<'a> = std::iter::Once<&'a (usize, Self::F)>;
+    type Iter<'a, G: 'a> = std::iter::Once<&'a (usize, G)>;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter<'_, Self::F> {
         iter::once(&self.0)
     }
 

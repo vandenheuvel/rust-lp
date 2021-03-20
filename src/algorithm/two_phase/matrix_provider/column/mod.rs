@@ -29,18 +29,18 @@ pub trait Column: Clone {
     ///
     /// Items of this type get read and used in additions and multiplications often.
     // TODO(ENHANCEMENT): Don't work with a field type directly, but an `Into<F>` type to separate.
-    type F: 'static + ColumnNumber;
+    type F: ColumnNumber;
 
     /// Type of struct to iterate over this column.
     ///
     /// It should be somewhat cheaply cloneable and as such not be too large.
-    type Iter<'a>: Iterator<Item = &'a SparseTuple<Self::F>> + Clone;
+    type Iter<'a, G: 'a>: Iterator<Item = &'a SparseTuple<G>> + Clone;
 
     /// Derive the iterator object.
     ///
     /// Because this column might need to be iterated over many times, it doesn't consume the
     /// column but instead produces a struct that might keep references to this column.
-    fn iter(&self) -> Self::Iter<'_>;
+    fn iter(&self) -> Self::Iter<'_, Self::F>;
 
     /// Format an index of the column.
     ///
@@ -78,11 +78,11 @@ pub trait OrderedColumn: Column {
 pub struct SparseColumn<F> {
     pub inner: Vec<SparseTuple<F>>
 }
-impl<F: 'static + ColumnNumber> Column for SparseColumn<F> {
+impl<F: ColumnNumber> Column for SparseColumn<F> {
     type F = F;
-    type Iter<'a> = impl Iterator<Item = &'a SparseTuple<Self::F>> + Clone;
+    type Iter<'a, G: 'a> = impl Iterator<Item = &'a SparseTuple<G>> + Clone;
 
-    fn iter(&self) -> Self::Iter<'_> {
+    fn iter(&self) -> Self::Iter<'_, Self::F> {
         self.inner.iter()
     }
 

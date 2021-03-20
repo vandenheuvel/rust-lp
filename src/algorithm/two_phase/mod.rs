@@ -27,16 +27,16 @@ where
     MP: MatrixProvider<Column: IdentityColumn + IntoFilteredColumn>,
 {
     // TODO(ENHANCEMENT): Specialize for MatrixProviders that can be filtered directly.
-    default fn solve_relaxation<IM>(&self) -> OptimizationResult<IM::F>
+    default fn solve_relaxation<'provider, IM>(&'provider self) -> OptimizationResult<IM::F>
     where
         IM: InverseMaintener<F:
             im_ops::InternalHR +
             im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
             im_ops::Cost<ArtificialCost> +
+            im_ops::Cost<MP::Cost<'provider>> +
             im_ops::Rhs<MP::Rhs> +
             im_ops::Column<MP::Rhs> +
         >,
-        for<'r> IM::F: im_ops::Cost<MP::Cost<'r>>,
     {
         // Default choice
         // TODO(ENHANCEMENT): Consider implementing a heuristic to decide these strategies
@@ -83,18 +83,20 @@ impl<MP: FullInitialBasis> SolveRelaxation for MP
 where
     // TODO(ARCHITECTURE): The <MP as MatrixProvider>::Column: IdentityColumn bound is needed
     //  because of limitations of the specialization feature; overlap is not (yet) allowed.
-    MP: MatrixProvider<Column: IdentityColumn + IntoFilteredColumn>,
-    MP::Rhs: 'static + ColumnNumber,
+    MP: MatrixProvider<
+        Column: IdentityColumn + IntoFilteredColumn,
+        Rhs: 'static + ColumnNumber,
+    >,
 {
     fn solve_relaxation<'provider, IM>(&'provider self) -> OptimizationResult<IM::F>
     where
         IM: InverseMaintener<F:
             im_ops::InternalHR +
             im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
+            im_ops::Cost<MP::Cost<'provider>> +
             im_ops::Rhs<Self::Rhs> +
             im_ops::Column<Self::Rhs> +
         >,
-        for<'r> IM::F: im_ops::Cost<MP::Cost<'r>>,
     {
         // TODO(ENHANCEMENT): Consider implementing a heuristic to decide these strategies
         //  dynamically
