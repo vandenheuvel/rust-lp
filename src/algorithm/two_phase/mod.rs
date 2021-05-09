@@ -30,7 +30,7 @@ where
     default fn solve_relaxation<IM>(&self) -> OptimizationResult<IM::F>
     where
         IM: InverseMaintener<F:
-            im_ops::InternalHR +
+            im_ops::FieldHR +
             im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
             im_ops::Cost<ArtificialCost> +
             im_ops::Rhs<MP::Rhs> +
@@ -89,7 +89,7 @@ where
     fn solve_relaxation<IM>(&self) -> OptimizationResult<IM::F>
     where
         IM: InverseMaintener<F:
-            im_ops::InternalHR +
+            im_ops::FieldHR +
             im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
             im_ops::Rhs<Self::Rhs> +
             im_ops::Column<Self::Rhs> +

@@ -24,7 +24,7 @@ pub struct BasisInverseRows<F> {
 
 impl<F> BasisInverseRows<F>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
 {
     /// Create a new instance by wrapping sparse vectors.
     #[must_use]
@@ -90,7 +90,7 @@ where
 
 impl<F> BasisInverse for BasisInverseRows<F>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
 {
     type F = F;
     type ColumnComputationInfo = SparseVector<Self::F, Self::F>;
@@ -190,7 +190,7 @@ where
 
 impl<F> RemoveBasisPart for BasisInverseRows<F>
 where
-    F: SparseElement<F> + ops::Internal + ops::InternalHR,
+    F: SparseElement<F> + ops::Field + ops::FieldHR,
 {
     fn remove_basis_part(&mut self, indices: &[usize]) {
         let old_m = self.m();
@@ -218,7 +218,7 @@ impl<F: SparseElement<F>> ColumnComputationInfo<F> for SparseVector<F, F> {
 
 impl<F> fmt::Display for BasisInverseRows<F>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = 8;

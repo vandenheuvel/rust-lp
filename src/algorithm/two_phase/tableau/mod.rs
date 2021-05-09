@@ -196,7 +196,7 @@ where
 
 impl<IM, K> Tableau<IM, K>
 where
-    IM: InverseMaintener<F: im_ops::InternalHR + im_ops::Column<<K::Column as Column>::F> + im_ops::Cost<K::Cost>>,
+    IM: InverseMaintener<F: im_ops::FieldHR + im_ops::Column<<K::Column as Column>::F> + im_ops::Cost<K::Cost>>,
     K: Kind,
 {
     /// Determine the row to pivot on.

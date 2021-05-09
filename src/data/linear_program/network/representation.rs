@@ -144,6 +144,7 @@ pub enum ArcDirection {
     Outgoing,
 }
 
+// TODO(ARCHITECTURE): Consider renaming `Nonzero` to something like `SparseElement`
 impl Nonzero for ArcDirection {
     fn is_not_zero(&self) -> bool {
         true

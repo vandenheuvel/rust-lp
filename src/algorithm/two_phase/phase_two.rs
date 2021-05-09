@@ -23,7 +23,7 @@ pub fn primal<IM, MP, PR>(
     tableau: &mut Tableau<IM, NonArtificial<MP>>,
 ) -> OptimizationResult<IM::F>
 where
-    IM: InverseMaintener<F: im_ops::InternalHR + im_ops::Column<<MP::Column as Column>::F>>,
+    IM: InverseMaintener<F: im_ops::FieldHR + im_ops::Column<<MP::Column as Column>::F>>,
     for<'r> IM::F: im_ops::Cost<MP::Cost<'r>>,
     MP: MatrixProvider,
     PR: PivotRule,

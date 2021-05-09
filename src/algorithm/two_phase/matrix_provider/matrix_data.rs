@@ -17,6 +17,7 @@ use crate::data::linear_algebra::vector::{DenseVector, SparseVector, Vector};
 use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::general_form::Variable;
 use crate::data::number_types::traits::{Field, FieldRef};
+use crate::data::number_types::nonzero::Nonzero;
 
 /// The `MatrixData` struct represents variables in 6 different categories.
 ///
@@ -123,7 +124,7 @@ enum ColumnType {
 
 impl<'a, F: 'static> MatrixData<'a, F>
 where
-    F: SparseElement<F> + Field,
+    F: SparseElement<F> + Field + Nonzero,
     for <'r> &'r F: FieldRef<F>,
 {
     /// Create a new `MatrixData` instance.
@@ -298,7 +299,7 @@ where
 
 impl<'data, F: 'static> MatrixProvider for MatrixData<'data, F>
 where
-    F: Field + SparseElement<F>,
+    F: Field + SparseElement<F> + Nonzero,
     for<'r> &'r F: FieldRef<F>,
 {
     type Column = Column<F>;
@@ -426,7 +427,7 @@ where
 
 impl<'a, F: 'static> PartialInitialBasis for MatrixData<'a, F>
 where
-    F: SparseElement<F> + Field,
+    F: SparseElement<F> + Field + Nonzero,
     for <'r> &'r F: FieldRef<F>,
 {
     fn pivot_element_indices(&self) -> Vec<(usize, usize)> {
@@ -616,7 +617,7 @@ where
 
 impl<'a, F: 'static> Display for MatrixData<'a, F>
 where
-    F: Field + SparseElement<F> + 'a,
+    F: Field + SparseElement<F> + Nonzero + 'a,
     for<'r> &'r F: FieldRef<F>,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {

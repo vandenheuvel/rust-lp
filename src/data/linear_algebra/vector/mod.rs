@@ -78,6 +78,7 @@ pub mod test {
     use crate::data::linear_algebra::vector::{DenseVector, SparseVector, Vector};
     use crate::data::number_types::traits::{Field, FieldRef};
     use crate::F;
+    use crate::data::number_types::nonzero::Nonzero;
 
     pub trait TestVector<F>: Vector<F> {
         fn from_test_data<T: ToPrimitive + Zero>(data: Vec<T>) -> Self;
@@ -140,7 +141,7 @@ pub mod test {
     }
 
     /// Test
-    fn push_value<F: Field + FromPrimitive, V: TestVector<F>>() where for<'r> &'r F: FieldRef<F> {
+    fn push_value<F: Field + FromPrimitive + Nonzero, V: TestVector<F>>() where for<'r> &'r F: FieldRef<F> {
         let mut v = get_test_vector::<F, V>();
         let len = v.len();
         let new_v = F!(1);
@@ -151,7 +152,7 @@ pub mod test {
     }
 
     /// Test
-    fn get_set<F: Field + FromPrimitive, V: TestVector<F>>() {
+    fn get_set<F: Field + FromPrimitive + Nonzero, V: TestVector<F>>() {
         let mut v = get_test_vector::<F, V>();
 
         // Getting a nonzero value
@@ -181,7 +182,7 @@ pub mod test {
     }
 
     /// Test
-    fn out_of_bounds_set<F: Field + FromPrimitive, V: TestVector<F>>() {
+    fn out_of_bounds_set<F: Field + FromPrimitive + Nonzero, V: TestVector<F>>() {
         let mut v = get_test_vector::<F, V>();
 
         v.set(400, F!(45));

@@ -71,7 +71,8 @@ pub(crate) fn remove_sparse_indices<T>(vector: &mut Vec<(usize, T)>, indices: &[
 }
 
 pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
-    left: impl Iterator<Item=(I, T)> + Sized, right: impl Iterator<Item=(I, T)> + Sized,
+    left: impl Iterator<Item=(I, T)> + Sized,
+    right: impl Iterator<Item=(I, T)> + Sized,
     operation: impl Fn(T, T) -> T,
 ) -> Vec<(I, T)> {
     let mut result = Vec::with_capacity(left.size_hint().0.max(right.size_hint().0));
@@ -107,7 +108,8 @@ pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
 
 #[cfg(test)]
 mod test {
-    use crate::algorithm::utilities::{remove_indices, remove_sparse_indices};
+    use crate::algorithm::utilities::{remove_indices, remove_sparse_indices, merge_sparse_indices};
+    use std::ops::Add;
 
     #[test]
     fn test_remove_indices() {
@@ -163,5 +165,40 @@ mod test {
         let indices = vec![];
         remove_sparse_indices(&mut tuples, &indices);
         assert_eq!(tuples, vec![(1_000, 1f64)]);
+    }
+
+    #[test]
+    fn test_merge_sparse_indices() {
+        // Empty
+        let left: Vec<(i8, i16)> = vec![];
+        let right = vec![];
+
+        let result = merge_sparse_indices(left.into_iter(), right.into_iter(), Add::add);
+        let expected = vec![];
+        assert_eq!(result, expected);
+
+        // Not related
+        let left = vec![(1, 6)].into_iter();
+        let right = vec![(4, 9)].into_iter();
+
+        let result = merge_sparse_indices(left, right, Add::add);
+        let expected = vec![(1, 6), (4, 9)];
+        assert_eq!(result, expected);
+
+        // Same index
+        let left = vec![(1, 6)].into_iter();
+        let right = vec![(1, 9)].into_iter();
+
+        let result = merge_sparse_indices(left, right, Add::add);
+        let expected = vec![(1, 15)];
+        assert_eq!(result, expected);
+
+        // Alternating
+        let left = vec![(1, 6), (3, 4)].into_iter();
+        let right = vec![(2, 9)].into_iter();
+
+        let result = merge_sparse_indices(left, right, Add::add);
+        let expected = vec![(1, 6), (2, 9), (3, 4)];
+        assert_eq!(result, expected);
     }
 }

@@ -1,6 +1,9 @@
-use crate::data::number_types::nonzero::{NonzeroSigned, Nonzero, NonzeroSign};
+use crate::data::number_types::nonzero::{Nonzero, NonzeroSign};
+use num::One;
+use crate::algorithm::utilities::merge_sparse_indices;
+use std::ops::{Add, Mul};
 
-pub trait NonzeroFactorizable: NonzeroSigned {
+pub trait NonzeroFactorizable: Nonzero {
     /// Some prime greater than 1.
     type Factor: Nonzero + Ord;
     /// How often the factor appears in the number.
@@ -12,6 +15,7 @@ pub trait NonzeroFactorizable: NonzeroSigned {
 /// Prime factorization representation of a nonzero rational number.
 ///
 /// Includes a sign.
+#[derive(Eq, PartialEq, Clone, Debug)]
 pub struct NonzeroFactorization<Factor, Power> {
     /// Whether the number is negative.
     pub sign: NonzeroSign,
@@ -22,4 +26,47 @@ pub struct NonzeroFactorization<Factor, Power> {
     ///
     /// When this field is empty, the value `1` or `-1` is represented, depending on `sign`.
     pub factors: Vec<(Factor, Power)>,
+}
+
+impl<Factor: Ord, Power: Nonzero + Eq + Add<Output=Power>> One for NonzeroFactorization<Factor, Power> {
+    fn one() -> Self {
+        Self {
+            sign: NonzeroSign::Positive,
+            factors: vec![],
+        }
+    }
+}
+
+impl<Factor: Ord, Power: Nonzero + Eq + Add<Output=Power>> Mul for NonzeroFactorization<Factor, Power> {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        let sign = self.sign * rhs.sign;
+        let factors = merge_sparse_indices(
+            self.factors.into_iter(),
+            rhs.factors.into_iter(),
+            Add::add,
+        );
+
+        Self { sign, factors }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::data::number_types::traits::factorization::NonzeroFactorizable;
+
+    #[test]
+    fn test_multiply() {
+        let a = 6;
+        let b = 36;
+
+        let a_factorized = a.factorize();
+        let b_factorized = b.factorize();
+
+        let c = a * b;
+        let c_factorized = c.factorize();
+
+        assert_eq!(a_factorized * b_factorized, c_factorized);
+    }
 }

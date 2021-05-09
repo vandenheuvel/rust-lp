@@ -10,6 +10,7 @@ use crate::data::linear_program::network::representation::ArcIncidenceColumn;
 use crate::data::linear_program::network::representation::ArcIncidenceMatrix;
 use crate::data::number_types::binary::Binary;
 use crate::data::number_types::traits::Field;
+use crate::data::number_types::nonzero::Nonzero;
 
 /// Solving a shortest path problem as a linear program.
 #[derive(Debug, Clone, PartialEq)]
@@ -26,7 +27,7 @@ struct Primal<F> {
 
 impl<F> Primal<F>
 where
-    F: Field,
+    F: Field + Nonzero,
 {
     pub fn new(
         adjacency_matrix: SparseMatrix<F, F, ColumnMajor>,
@@ -60,7 +61,7 @@ where
 
 impl<F: 'static> MatrixProvider for Primal<F>
 where
-    F: Field,
+    F: Field + Nonzero,
 {
     type Column = ArcIncidenceColumn;
     type Cost<'a> = &'a F;
@@ -113,7 +114,7 @@ where
 
 impl<F: 'static> Display for Primal<F>
 where
-    F: Field,
+    F: Field + Nonzero,
 {
     fn fmt(&self, f: &mut Formatter) -> FormatResult {
         writeln!(f, "Shortest Path Network")?;

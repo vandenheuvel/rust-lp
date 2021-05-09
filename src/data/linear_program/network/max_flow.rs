@@ -17,6 +17,7 @@ use crate::data::linear_algebra::vector::{DenseVector, SparseVector};
 use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::network::representation::{ArcDirection, ArcIncidenceMatrix};
 use crate::data::number_types::rational::RationalBig;
+use crate::data::number_types::nonzero::Nonzero;
 
 /// Maximum flow problem.
 struct Primal<F> {
@@ -121,7 +122,7 @@ impl IntoFilteredColumn for Column {
 
 impl<F> MatrixProvider for Primal<F>
 where
-    F: SparseElement<F> + Zero + Eq,
+    F: SparseElement<F> + Zero + Eq + Nonzero,
 {
     type Column = Column;
     type Cost<'a> = Cost;
@@ -192,7 +193,7 @@ where
 
 impl<F> PartialInitialBasis for Primal<F>
 where
-    F: SparseElement<F> + Zero + Eq,
+    F: SparseElement<F> + Zero + Eq + Nonzero,
 {
     fn pivot_element_indices(&self) -> Vec<(usize, usize)> {
         (0..self.nr_edges()).map(|j| (j + self.nr_constraints(), self.nr_edges() + j)).collect()

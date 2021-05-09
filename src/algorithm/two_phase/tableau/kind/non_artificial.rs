@@ -73,7 +73,7 @@ where
 impl<'provider, IM, MP> Tableau<IM, NonArtificial<'provider, MP>>
 where
     IM: InverseMaintener<F:
-        im_ops::InternalHR +
+        im_ops::FieldHR +
         im_ops::Column<<MP::Column as Column>::F> +
         im_ops::Cost<MP::Cost<'provider>> +
     >,
@@ -174,7 +174,7 @@ where
 
 impl<'provider, IM, MP> Tableau<IM, NonArtificial<'provider, MP>>
 where
-    IM: InverseMaintener<F: im_ops::InternalHR + im_ops::Column<<MP::Column as Column>::F> + im_ops::Cost<MP::Cost<'provider>>>,
+    IM: InverseMaintener<F: im_ops::FieldHR + im_ops::Column<<MP::Column as Column>::F> + im_ops::Cost<MP::Cost<'provider>>>,
     MP: Filtered,
 {
     /// Create a `Tableau` from an artificial tableau while removing some rows.

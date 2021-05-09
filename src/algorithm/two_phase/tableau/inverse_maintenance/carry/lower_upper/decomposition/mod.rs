@@ -16,7 +16,7 @@ mod pivoting;
 
 impl<F> LUDecomposition<F>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
 {
     /// Compute the factorization `PBQ = LU`.
     ///

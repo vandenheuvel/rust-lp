@@ -13,15 +13,10 @@ mod big;
 mod macros;
 mod factorization;
 
-pub trait Rational: Nonzero {
-    type Numerator;
-    type Denominator;
-
-    fn numerator(&self) -> &Self::Numerator;
-    fn denominator(&self) -> &Self::Denominator;
-
-    fn numerator_mut(&mut self) -> &mut Self::Numerator;
-    fn denominator_mut(&mut self) -> &mut Self::Denominator;
+#[derive(Clone, Debug)]
+pub struct Ratio<Numerator, Denominator> {
+    numerator: Numerator,
+    denominator: Denominator,
 }
 
 #[cfg(test)]

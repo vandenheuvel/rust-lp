@@ -31,7 +31,7 @@ pub trait InverseMaintener: Display + Sized {
     ///
     /// Because the algorithm works with results from this object, many other parts of the code use
     /// the same number type. Examples are the tableau and pivot rules.
-    type F: ops::Internal;
+    type F: ops::Field;
 
     /// Contains the computed column and potentially other information that can be reused from that
     /// process.
@@ -136,7 +136,7 @@ pub trait InverseMaintener: Display + Sized {
         nr_artificial: usize,
     ) -> Self
     where
-        Self::F: ops::InternalHR + ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'provider>>,
+        Self::F: ops::FieldHR + ops::Column<<MP::Column as Column>::F> + ops::Cost<MP::Cost<'provider>>,
     ;
 
     /// When a previous basis inverse representation was used to find a basic feasible solution.

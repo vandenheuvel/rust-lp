@@ -28,7 +28,7 @@ pub trait FeasibilityComputeTrait: MatrixProvider<Column: IdentityColumn> {
     fn compute_bfs_giving_im<IM>(&self) -> RankedFeasibilityResult<IM>
     where
         IM: InverseMaintener<F:
-            im_ops::InternalHR +
+            im_ops::FieldHR +
             im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
             im_ops::Cost<Cost> +
             im_ops::Rhs<<Self as MatrixProvider>::Rhs> +
@@ -44,7 +44,7 @@ where
     default fn compute_bfs_giving_im<IM>(&self) -> RankedFeasibilityResult<IM>
     where
         IM: InverseMaintener<F:
-            im_ops::InternalHR +
+            im_ops::FieldHR +
             im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
             im_ops::Cost<Cost> +
             im_ops::Rhs<<Self as MatrixProvider>::Rhs> +
@@ -86,7 +86,7 @@ where
     default fn compute_bfs_giving_im<IM>(&self) -> RankedFeasibilityResult<IM>
     where
         IM: InverseMaintener<F:
-            im_ops::InternalHR +
+            im_ops::FieldHR +
             im_ops::Column<<<Self as MatrixProvider>::Column as Column>::F> +
             im_ops::Cost<Cost> +
             im_ops::Rhs<<Self as MatrixProvider>::Rhs> +
@@ -126,7 +126,7 @@ pub(crate) fn primal<IM, K, MP, PR>(
     mut tableau: Tableau<IM, K>,
 ) -> RankedFeasibilityResult<IM>
 where
-    IM: InverseMaintener<F: im_ops::InternalHR + im_ops::Column<<K::Column as Column>::F> + im_ops::Cost<K::Cost>>,
+    IM: InverseMaintener<F: im_ops::FieldHR + im_ops::Column<<K::Column as Column>::F> + im_ops::Cost<K::Cost>>,
     K: Artificial,
     MP: MatrixProvider,
     PR: PivotRule,

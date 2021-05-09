@@ -169,7 +169,7 @@ pub trait RemoveBasisPart: BasisInverse {
 
 impl<F, BI> Carry<F, BI>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
     BI: BasisInverse<F=F>,
 {
     /// Create a `Carry` for a tableau with a known basis inverse.
@@ -349,7 +349,7 @@ where
 
 impl<F, BI> InverseMaintener for Carry<F, BI>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
     BI: BasisInverse<F=F>,
 {
     type F = F;
@@ -644,7 +644,7 @@ where
 
 impl<F, BI> InverseMaintener for Carry<F, BI>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
     BI: BasisInverse<F=F> + RemoveBasisPart,
 {
     fn from_artificial_remove_rows<'provider, MP: Filtered>(
@@ -691,7 +691,7 @@ where
 
 impl<F, BI> Display for Carry<F, BI>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
     BI: BasisInverse<F=F>,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

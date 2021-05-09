@@ -19,7 +19,7 @@ pub struct EtaFile<F> {
 
 impl<F> EtaFile<F>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
 {
     /// Create a new instance.
     ///

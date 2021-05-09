@@ -26,6 +26,7 @@ use crate::data::linear_program::general_form::presolve::updates::Changes;
 use crate::data::linear_program::general_form::RemovedVariable::{FunctionOfOthers, Solved};
 use crate::data::linear_program::solution::Solution;
 use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
+use crate::data::number_types::nonzero::Nonzero;
 
 mod presolve;
 
@@ -854,7 +855,7 @@ where
     ) -> Solution<G>
     where
         // TODO: Find a suitable trait alias to avoid this many trait bounds.
-        G: Sum + Neg<Output=G> + AddAssign<OF> + PartialEq<OF> + LinearAlgebraElement<G> + From<OF> + Eq + Ord + Zero,
+        G: Sum + Neg<Output=G> + AddAssign<OF> + PartialEq<OF> + LinearAlgebraElement<G> + From<OF> + Eq + Ord + Zero + Nonzero,
         for<'r> G: Add<&'r OF, Output=G>,
         for<'r> &'r G: Neg<Output=G> + Mul<&'r OF, Output=G> + Add<&'r OF, Output=G> + Sub<&'r G, Output=G>,
     {
@@ -904,7 +905,7 @@ where
         reduced_solution: &SparseVector<G, G>,
     ) -> &'a G
     where
-        G: LinearAlgebraElement<G> + Zero + From<OF> + Sum + Neg<Output=G>,
+        G: LinearAlgebraElement<G> + Zero + From<OF> + Sum + Neg<Output=G> + Nonzero,
         for<'r> G: Add<&'r OF, Output=G>,
         for<'r> &'r G: Neg<Output=G> + Mul<&'r OF, Output=G> + Add<&'r OF, Output=G> + Sub<&'r G, Output=G>,
     {

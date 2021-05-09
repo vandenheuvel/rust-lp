@@ -21,6 +21,7 @@ use crate::data::linear_program::general_form::Variable;
 use crate::data::number_types::rational::{Rational64, RationalBig};
 use crate::data::number_types::traits::Field;
 use crate::RB;
+use crate::data::number_types::nonzero::Nonzero;
 
 type T = Rational64;
 type S = RationalBig;
@@ -66,7 +67,7 @@ fn conversion_pipeline() {
     ], 5)));
 }
 
-pub fn create_matrix_data_data<T: Field + FromPrimitive>(
+pub fn create_matrix_data_data<T: Field + FromPrimitive + Nonzero>(
 ) -> (Sparse<T, T, ColumnMajor>, DenseVector<T>, Vec<Variable<T>>) {
     let constraints = ColumnMajor::from_test_data(
         &vec![

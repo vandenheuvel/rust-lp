@@ -45,7 +45,7 @@ fn get_test_file_path(name: &str) -> PathBuf {
 }
 
 fn solve<
-    IMT: im_ops::Internal + im_ops::InternalHR + im_ops::Column<GFT> + AddAssign<GFT> + PartialEq<GFT> + Ord,
+    IMT: im_ops::Field + im_ops::FieldHR + im_ops::Column<GFT> + AddAssign<GFT> + PartialEq<GFT> + Ord,
     GFT: 'static + From<Rational64> + Zero + One + Ord + Element + OrderedField,
 >(file_name: &str) -> Solution<IMT>
 where

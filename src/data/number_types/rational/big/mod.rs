@@ -5,6 +5,8 @@
 //! this type can be modified and specialized as needed.
 use std::fmt::{Debug, Formatter};
 use std::fmt;
+use crate::data::number_types::nonzero::Nonzero;
+use num::Zero;
 
 mod with_fixed_size_integer;
 mod with_binary;
@@ -25,6 +27,12 @@ impl Big {
     #[must_use]
     pub fn new(numer: i64, denom: i64) -> Self {
         Self(num::BigRational::new(numer.into(), denom.into()))
+    }
+}
+
+impl Nonzero for Big {
+    fn is_not_zero(&self) -> bool {
+        !self.is_zero()
     }
 }
 

@@ -19,7 +19,7 @@ mod counters;
 pub(super) mod scale;
 pub use scale::Scalable as Prescalable;
 use crate::data::number_types::nonzero::NonzeroSign;
-use crate::data::number_types::nonzero::sign::Signed;
+use crate::data::number_types::nonzero::sign::NonzeroSigned;
 
 /// Container data structure to keep track of presolve status.
 ///

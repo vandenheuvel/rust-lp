@@ -58,7 +58,7 @@ pub struct LUDecomposition<F> {
 
 impl<F> BasisInverse for LUDecomposition<F>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
 {
     type F = F;
     type ColumnComputationInfo = ColumnAndSpike<Self::F>;
@@ -231,7 +231,7 @@ where
 
 impl<F> LUDecomposition<F>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
 {
     fn invert_lower_right(&self, mut rhs: BTreeMap<usize, F>) -> Vec<(usize, F)> {
         let mut result = Vec::new();
@@ -358,7 +358,7 @@ where
 
 fn insert_or_shift_maybe_remove<F>(index: usize, change: F, rhs: &mut BTreeMap<usize, F>)
 where
-    F: ops::Internal + ops::InternalHR + Zero,
+    F: ops::Field + ops::FieldHR + Zero,
 {
     match rhs.get_mut(&index) {
         None => {
@@ -392,7 +392,7 @@ impl<F: SparseElement<F>> ColumnComputationInfo<F> for ColumnAndSpike<F> {
 
 impl<F> Display for LUDecomposition<F>
 where
-    F: ops::Internal + ops::InternalHR,
+    F: ops::Field + ops::FieldHR,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = 10;

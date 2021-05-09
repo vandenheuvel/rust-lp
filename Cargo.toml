@@ -21,6 +21,13 @@ daggy = "0.7.0"  # Currently only for debug asserts
 
 clap = { version = "3.0.0-beta.2", optional = true }
 
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "benchmark"
+harness = false
+
 [features]
 burkardt = []
 miplib = []
