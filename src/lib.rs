@@ -17,6 +17,8 @@
 #![feature(vecdeque_binary_search)]
 #![feature(map_first_last)]
 #![feature(unchecked_math)]
+#![feature(result_into_ok_or_err)]
+#![feature(label_break_value)]
 
 extern crate daggy;
 extern crate num;

@@ -2,12 +2,106 @@
 use gcd::Gcd;
 use num::Integer;
 
-use crate::data::number_types::integer::factorization::prime::primes::SMALL_ODD_PRIMES;
-use crate::data::number_types::traits::factorization::{NonzeroFactorizable, NonzeroFactorization};
 use crate::data::number_types::integer::factorization::prime::Prime;
+use crate::data::number_types::integer::factorization::prime::primes::SMALL_ODD_PRIMES;
+use crate::data::number_types::nonzero::NonzeroSigned;
 use crate::data::number_types::nonzero::sign::Sign;
+use crate::data::number_types::traits::factorization::{NonzeroFactorizable, NonzeroFactorization};
 
 pub mod prime;
+
+impl NonzeroFactorizable for i32 {
+    type Factor = u32;
+    // TODO(CORRECTNESS): Consider making this type unsigned
+    type Power = i8;
+
+    fn factorize(&self) -> NonzeroFactorization<Self::Factor, Self::Power> {
+        let sign = NonzeroSigned::signum(self);
+        let NonzeroFactorization {
+            factors, ..
+        } = (self.abs() as u32).factorize();
+        NonzeroFactorization { sign, factors }
+    }
+}
+
+impl NonzeroFactorizable for u32 {
+    type Factor = u32;
+    // TODO(CORRECTNESS): Consider making this type unsigned
+    type Power = i8;
+
+    fn factorize(&self) -> NonzeroFactorization<Self::Factor, Self::Power> {
+        debug_assert_ne!(*self, 0);
+
+        let mut x = self.clone();
+        let mut unsorted_factors = Vec::with_capacity(32);
+
+        while x.is_even() {
+            x /= 2;
+            unsorted_factors.push(2);
+        }
+
+        'odd_trial_division: {
+            // smallest
+            for divisor in SMALL_ODD_PRIMES {
+                while x % divisor as u32 == 0 {
+                    x /= divisor as u32;
+                    unsorted_factors.push(divisor as u32);
+                }
+
+                if x == 1 {
+                    break 'odd_trial_division;
+                }
+            }
+            // small
+            let first = *SMALL_ODD_PRIMES.last().unwrap() as u32 + 2;
+            let last = 2_u32.pow(32 / 2);
+            let mut sqrt = ((x as f64).sqrt() + 2_f64) as u32;
+            for divisor in (first..last).step_by(2) {
+                while x % divisor == 0 {
+                    x /= divisor;
+                    sqrt = ((x as f64).sqrt() + 2_f64) as u32;
+                    unsorted_factors.push(divisor);
+                }
+
+                if x == 1 {
+                    break 'odd_trial_division;
+                } else if divisor > sqrt {
+                    unsorted_factors.push(x);
+                    break 'odd_trial_division;
+                }
+            }
+        }
+
+        // Aggregate the factors
+        let mut factors = Vec::with_capacity(16);
+        for factor in unsorted_factors {
+            if let Some((existing_factor, count)) = factors.last_mut() {
+                if *existing_factor == factor {
+                    *count += 1;
+                    continue;
+                }
+            }
+
+            factors.push((factor, 1));
+        }
+
+        NonzeroFactorization { sign: Sign::Positive, factors }
+    }
+}
+
+impl NonzeroFactorizable for i64 {
+    type Factor = u64;
+    // TODO(CORRECTNESS): Consider making this type unsigned
+    type Power = i8;
+
+    fn factorize(&self) -> NonzeroFactorization<Self::Factor, Self::Power> {
+        let sign = NonzeroSigned::signum(self);
+        let NonzeroFactorization {
+            factors, ..
+        } = (self.abs() as u64).factorize();
+        NonzeroFactorization { sign, factors }
+    }
+}
 
 impl NonzeroFactorizable for u64 {
     type Factor = u64;
@@ -26,34 +120,42 @@ impl NonzeroFactorizable for u64 {
             x /= 2;
             unsorted_factors.push(2);
         }
-        // odd and smallest
-        for divisor in SMALL_ODD_PRIMES {
-            while x % divisor as u64 == 0 {
-                x /= divisor as u64;
-                unsorted_factors.push(divisor as u64);
+        'odd: {
+            // smallest
+            for divisor in SMALL_ODD_PRIMES {
+                while x % divisor as u64 == 0 {
+                    x /= divisor as u64;
+                    unsorted_factors.push(divisor as u64);
+                }
+
+                if x == 1 {
+                    break 'odd;
+                }
+            }
+            // small
+            let first = *SMALL_ODD_PRIMES.last().unwrap() as u64 + 2;
+            let last = 500_000;
+            // TODO(PERFORMANCE): How far should this loop go?
+            let mut sqrt = ((x as f64).sqrt() + 2_f64) as u64;
+            for divisor in (first..last).step_by(2) {
+                while x % divisor == 0 {
+                    x /= divisor;
+                    sqrt = ((x as f64).sqrt() + 2_f64) as u64;
+                    unsorted_factors.push(divisor);
+                }
+
+                if x == 1 {
+                    break 'odd;
+                } else if divisor > sqrt {
+                    // Checked enough, must be prime
+                    unsorted_factors.push(x);
+                    break 'odd;
+                }
             }
 
-            if x == 1 {
-                break;
-            }
+            // Prime test and Pollard's rho
+            rho_loop(x, &mut unsorted_factors);
         }
-        // odd and small
-        let first = *SMALL_ODD_PRIMES.last().unwrap() as u64 + 2;
-        let last = 500_000;
-        // TODO(PERFORMANCE): How far should this loop go?
-        for divisor in (first..last).step_by(2) {
-            while x % divisor == 0 {
-                x /= divisor;
-                unsorted_factors.push(divisor);
-            }
-
-            if x == 1 {
-                break;
-            }
-        }
-
-        // Prime test and Pollard's rho
-        rho_loop(x, &mut unsorted_factors);
 
         // Sort and aggregate the factors
         unsorted_factors.sort();
@@ -251,7 +353,7 @@ mod test {
     }
 
     #[test]
-    fn test_factorize_large_composite() {
+    fn test_factorize_large_composite_u64() {
         let composite = 2_u64.pow(36) - 7;
         assert_eq!(
             composite.factorize(),
@@ -263,6 +365,25 @@ mod test {
             NonzeroFactorization { sign: Sign::Positive, factors: vec![(3457, 1), (6203, 1), (53764867411, 1)] },
         );
         let composite = 2_u64.pow(53) - 113;
+        assert_eq!(
+            composite.factorize(),
+            NonzeroFactorization { sign: Sign::Positive, factors: vec![(3, 2), (43, 1), (642739, 1), (36211303, 1)] },
+        );
+    }
+
+    #[test]
+    fn test_factorize_large_composite_i64() {
+        let composite = 2_i64.pow(36) - 7;
+        assert_eq!(
+            composite.factorize(),
+            NonzeroFactorization { sign: Sign::Positive, factors: vec![(3, 1), (22906492243, 1)] },
+        );
+        let composite = 2_i64.pow(60) - 95;
+        assert_eq!(
+            composite.factorize(),
+            NonzeroFactorization { sign: Sign::Positive, factors: vec![(3457, 1), (6203, 1), (53764867411, 1)] },
+        );
+        let composite = 2_i64.pow(53) - 113;
         assert_eq!(
             composite.factorize(),
             NonzeroFactorization { sign: Sign::Positive, factors: vec![(3, 2), (43, 1), (642739, 1), (36211303, 1)] },

@@ -10,9 +10,9 @@ use std::convert::identity;
 /// Creating a factorization of an integer or rational number.
 pub trait NonzeroFactorizable: Nonzero {
     /// Some prime greater than 1.
-    type Factor: Nonzero + Ord;
+    type Factor: Nonzero + Ord + Clone;
     /// How often the factor appears in the number.
-    type Power: Nonzero;
+    type Power: Nonzero + Clone;
 
     /// Decompose into factors.
     ///
