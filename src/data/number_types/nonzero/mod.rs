@@ -1,3 +1,6 @@
+//! # Nonzero values
+//!
+//! We often work with sparse structures where many values are zero.
 use std::num::{NonZeroI128, NonZeroI16, NonZeroI32, NonZeroI64, NonZeroI8};
 use std::num::{NonZeroU128, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8};
 

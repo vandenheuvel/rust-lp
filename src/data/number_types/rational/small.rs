@@ -41,12 +41,6 @@ impl NonzeroSigned for R32 {
     }
 }
 
-impl Nonzero for R32 {
-    fn is_not_zero(&self) -> bool {
-        self.numerator.is_not_zero()
-    }
-}
-
 impl Add<Cost> for Rational64 {
     type Output = Self;
 

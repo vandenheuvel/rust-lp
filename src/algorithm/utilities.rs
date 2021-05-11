@@ -74,6 +74,8 @@ pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
     left: impl Iterator<Item=(I, T)> + Sized,
     right: impl Iterator<Item=(I, T)> + Sized,
     operation: impl Fn(T, T) -> T,
+    operation_left: impl Fn(T) -> T,
+    operation_right: impl Fn(T) -> T,
 ) -> Vec<(I, T)> {
     let mut result = Vec::with_capacity(left.size_hint().0.max(right.size_hint().0));
 
@@ -84,7 +86,7 @@ pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
         match left_index.cmp(&right_index) {
             Ordering::Less => {
                 let (index, value) = left.next().unwrap();
-                result.push((index, value));
+                result.push((index, operation_left(value)));
             },
             Ordering::Equal => {
                 let (left_index, left_value) = left.next().unwrap();
@@ -95,13 +97,17 @@ pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
             },
             Ordering::Greater => {
                 let (index, value) = right.next().unwrap();
-                result.push((index, value));
+                result.push((index, operation_right(value)));
             },
         }
     }
 
-    result.extend(left);
-    result.extend(right);
+    for (left_index, value) in left {
+        result.push((left_index, operation_left(value)))
+    }
+    for (right_index, value) in right {
+        result.push((right_index, operation_right(value)))
+    }
 
     result
 }
@@ -110,6 +116,7 @@ pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
 mod test {
     use crate::algorithm::utilities::{remove_indices, remove_sparse_indices, merge_sparse_indices};
     use std::ops::Add;
+    use std::convert::identity;
 
     #[test]
     fn test_remove_indices() {
@@ -173,15 +180,23 @@ mod test {
         let left: Vec<(i8, i16)> = vec![];
         let right = vec![];
 
-        let result = merge_sparse_indices(left.into_iter(), right.into_iter(), Add::add);
+        let result = merge_sparse_indices(left.into_iter(), right.into_iter(), Add::add, identity, identity);
         let expected = vec![];
+        assert_eq!(result, expected);
+
+        // One empty
+        let left: Vec<(i8, i16)> = vec![(2, 1)];
+        let right = vec![];
+
+        let result = merge_sparse_indices(left.into_iter(), right.into_iter(), Add::add, identity, identity);
+        let expected = vec![(2, 1)];
         assert_eq!(result, expected);
 
         // Not related
         let left = vec![(1, 6)].into_iter();
         let right = vec![(4, 9)].into_iter();
 
-        let result = merge_sparse_indices(left, right, Add::add);
+        let result = merge_sparse_indices(left, right, Add::add, identity, identity);
         let expected = vec![(1, 6), (4, 9)];
         assert_eq!(result, expected);
 
@@ -189,7 +204,7 @@ mod test {
         let left = vec![(1, 6)].into_iter();
         let right = vec![(1, 9)].into_iter();
 
-        let result = merge_sparse_indices(left, right, Add::add);
+        let result = merge_sparse_indices(left, right, Add::add, identity, identity);
         let expected = vec![(1, 15)];
         assert_eq!(result, expected);
 
@@ -197,7 +212,7 @@ mod test {
         let left = vec![(1, 6), (3, 4)].into_iter();
         let right = vec![(2, 9)].into_iter();
 
-        let result = merge_sparse_indices(left, right, Add::add);
+        let result = merge_sparse_indices(left, right, Add::add, identity, identity);
         let expected = vec![(1, 6), (2, 9), (3, 4)];
         assert_eq!(result, expected);
     }

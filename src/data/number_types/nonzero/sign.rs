@@ -1,4 +1,7 @@
-use std::ops::{Neg, Mul};
+//! # Signs of nonzero values
+//!
+//! Usual sign implementations have a sign for zero, the implementation in this module does not.
+use std::ops::{Mul};
 
 use num::Zero;
 

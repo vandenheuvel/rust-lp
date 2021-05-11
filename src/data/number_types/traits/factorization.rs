@@ -1,14 +1,22 @@
+//! # Number factorization
+//!
+//! Factorize integers and rational numbers into numbers that are often primes.
 use crate::data::number_types::nonzero::{Nonzero, NonzeroSign};
 use num::One;
 use crate::algorithm::utilities::merge_sparse_indices;
 use std::ops::{Add, Mul};
+use std::convert::identity;
 
+/// Creating a factorization of an integer or rational number.
 pub trait NonzeroFactorizable: Nonzero {
     /// Some prime greater than 1.
     type Factor: Nonzero + Ord;
     /// How often the factor appears in the number.
     type Power: Nonzero;
 
+    /// Decompose into factors.
+    ///
+    /// Note that these factors will often be, but are not guaranteed to be, primes.
     fn factorize(&self) -> NonzeroFactorization<Self::Factor, Self::Power>;
 }
 
@@ -43,9 +51,8 @@ impl<Factor: Ord, Power: Nonzero + Eq + Add<Output=Power>> Mul for NonzeroFactor
     fn mul(self, rhs: Self) -> Self::Output {
         let sign = self.sign * rhs.sign;
         let factors = merge_sparse_indices(
-            self.factors.into_iter(),
-            rhs.factors.into_iter(),
-            Add::add,
+            self.factors.into_iter(), rhs.factors.into_iter(),
+            Add::add, identity, identity,
         );
 
         Self { sign, factors }

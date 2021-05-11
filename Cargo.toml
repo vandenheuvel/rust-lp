@@ -16,6 +16,8 @@ exclude = ["tests"]
 itertools = "0.10.0"
 num = "0.4.0"
 
+gcd = "2.0.1"
+
 # TODO(PACKAGING): Make this an optional dependency.
 daggy = "0.7.0"  # Currently only for debug asserts
 

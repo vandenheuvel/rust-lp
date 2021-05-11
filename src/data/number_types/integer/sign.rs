@@ -1,3 +1,4 @@
+//! # Nonzero signs of integers
 use crate::data::number_types::nonzero::NonzeroSigned;
 use crate::data::number_types::nonzero::sign::Sign;
 use num::Zero;
