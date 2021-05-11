@@ -7,7 +7,7 @@ use crate::data::number_types::traits::factorization::{NonzeroFactorizable, Nonz
 use crate::data::number_types::integer::factorization::prime::Prime;
 use crate::data::number_types::nonzero::sign::Sign;
 
-mod prime;
+pub mod prime;
 
 impl NonzeroFactorizable for u64 {
     type Factor = u64;
@@ -39,13 +39,13 @@ impl NonzeroFactorizable for u64 {
         }
         // odd and small
         let first = *SMALL_ODD_PRIMES.last().unwrap() as u64 + 2;
-        let mut divisor = first;
-        for _ in 0..(SMALL_ODD_PRIMES.len() * 3) {
+        let last = 500_000;
+        // TODO(PERFORMANCE): How far should this loop go?
+        for divisor in (first..last).step_by(2) {
             while x % divisor == 0 {
                 x /= divisor;
                 unsorted_factors.push(divisor);
             }
-            divisor += 2;
 
             if x == 1 {
                 break;
@@ -73,9 +73,12 @@ impl NonzeroFactorizable for u64 {
     }
 }
 
+// TODO(PERFORMANCE): How long should this be tried?
 const RHO_BASE_LIMIT: u64 = 20;
 
 fn rho_loop(mut x: u64, factors: &mut Vec<u64>) {
+    debug_assert_ne!(x, 0);
+
     let mut e = 2;
     while x > 1 {
         if x.is_prime() || e == RHO_BASE_LIMIT {
