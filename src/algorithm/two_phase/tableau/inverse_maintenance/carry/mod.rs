@@ -10,10 +10,10 @@ use std::ops::Neg;
 
 use num::Zero;
 
-use crate::algorithm::two_phase::matrix_provider::MatrixProvider;
 use crate::algorithm::two_phase::matrix_provider::column::{Column, ColumnNumber, OrderedColumn, SparseColumn};
 use crate::algorithm::two_phase::matrix_provider::column::identity::{IdentityColumnStruct, One};
 use crate::algorithm::two_phase::matrix_provider::filter::Filtered;
+use crate::algorithm::two_phase::matrix_provider::MatrixProvider;
 use crate::algorithm::two_phase::tableau::inverse_maintenance::{ColumnComputationInfo, InverseMaintener, ops};
 use crate::algorithm::two_phase::tableau::kind::Kind;
 use crate::algorithm::utilities::remove_indices;

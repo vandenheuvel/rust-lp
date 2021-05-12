@@ -6,7 +6,7 @@ use std::cmp::Ordering;
 
 use crate::data::linear_algebra::traits::SparseElement;
 use crate::data::linear_program::elements::{BoundDirection, InequalityRelation, LinearProgramType};
-use crate::data::linear_program::elements::{RangedConstraintRelation};
+use crate::data::linear_program::elements::RangedConstraintRelation;
 use crate::data::linear_program::general_form::presolve::{Change, Index};
 use crate::data::linear_program::general_form::presolve::updates::BoundChange;
 use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};

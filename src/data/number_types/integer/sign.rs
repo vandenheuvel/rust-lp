@@ -1,8 +1,10 @@
 //! # Nonzero signs of integers
+use std::cmp::Ordering;
+
+use num::Zero;
+
 use crate::data::number_types::nonzero::NonzeroSigned;
 use crate::data::number_types::nonzero::sign::Sign;
-use num::Zero;
-use std::cmp::Ordering;
 
 impl NonzeroSigned for i32 {
     fn signum(&self) -> Sign {

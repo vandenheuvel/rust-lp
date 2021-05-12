@@ -6,8 +6,8 @@ use std::num::{NonZeroU128, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8};
 
 use num::Zero;
 
-pub use sign::Sign as NonzeroSign;
 pub use sign::NonzeroSigned as NonzeroSigned;
+pub use sign::Sign as NonzeroSign;
 
 pub mod sign;
 

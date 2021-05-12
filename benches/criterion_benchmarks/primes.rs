@@ -1,4 +1,5 @@
 use criterion::{black_box, Criterion, criterion_group, criterion_main};
+
 use rust_lp::data::number_types::integer::factorization::prime::Prime;
 
 pub fn is_prime_small_positive(c: &mut Criterion) {

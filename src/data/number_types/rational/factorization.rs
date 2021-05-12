@@ -1,10 +1,10 @@
-use std::ops::{Sub, Neg};
+use std::convert::identity;
+use std::ops::{Neg, Sub};
 
 use crate::algorithm::utilities::merge_sparse_indices;
-use crate::data::number_types::nonzero::{Nonzero};
-use crate::data::number_types::traits::factorization::{NonzeroFactorizable, NonzeroFactorization};
+use crate::data::number_types::nonzero::Nonzero;
 use crate::data::number_types::rational::Ratio;
-use std::convert::identity;
+use crate::data::number_types::traits::factorization::{NonzeroFactorizable, NonzeroFactorization};
 
 impl<Numerator, Denominator, Factor, Power> NonzeroFactorizable for Ratio<Numerator, Denominator>
 where
@@ -35,9 +35,9 @@ where
 
 #[cfg(test)]
 mod test {
+    use crate::data::number_types::nonzero::sign::Sign;
     use crate::data::number_types::rational::Ratio;
     use crate::data::number_types::traits::factorization::{NonzeroFactorizable, NonzeroFactorization};
-    use crate::data::number_types::nonzero::sign::Sign;
 
     #[test]
     fn test_factorize() {

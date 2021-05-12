@@ -1,11 +1,13 @@
 //! # Number factorization
 //!
 //! Factorize integers and rational numbers into numbers that are often primes.
-use crate::data::number_types::nonzero::{Nonzero, NonzeroSign};
-use num::One;
-use crate::algorithm::utilities::merge_sparse_indices;
-use std::ops::{Add, Mul};
 use std::convert::identity;
+use std::ops::{Add, Mul};
+
+use num::One;
+
+use crate::algorithm::utilities::merge_sparse_indices;
+use crate::data::number_types::nonzero::{Nonzero, NonzeroSign};
 
 /// Creating a factorization of an integer or rational number.
 pub trait NonzeroFactorizable: Nonzero {

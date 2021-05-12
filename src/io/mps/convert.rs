@@ -12,11 +12,12 @@ use num::{One, Zero};
 
 use crate::data::linear_algebra::matrix::{ColumnMajor, Order as MatrixOrder, Sparse};
 use crate::data::linear_algebra::SparseTuple;
-use crate::data::linear_algebra::traits::{Element};
+use crate::data::linear_algebra::traits::Element;
 use crate::data::linear_algebra::vector::{DenseVector, Vector};
 use crate::data::linear_program::elements::{ConstraintRelation, RangedConstraintRelation, VariableType};
 use crate::data::linear_program::general_form::GeneralForm;
 use crate::data::linear_program::general_form::Variable as ShiftedVariable;
+use crate::data::number_types::nonzero::Nonzero;
 use crate::data::number_types::traits::Abs;
 use crate::io::error::Inconsistency;
 use crate::io::mps::{Bound, MPS, Range};
@@ -24,7 +25,6 @@ use crate::io::mps::BoundType;
 use crate::io::mps::Column;
 use crate::io::mps::Rhs;
 use crate::io::mps::Row;
-use crate::data::number_types::nonzero::Nonzero;
 
 impl<FI, FO: From<FI>> TryInto<GeneralForm<FO>> for MPS<FI>
 where

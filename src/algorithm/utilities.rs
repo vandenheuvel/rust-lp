@@ -1,8 +1,9 @@
 //! # Utilities
 //!
 //! Helper functions for algorithms.
-use std::collections::HashSet;
 use std::cmp::Ordering;
+use std::collections::HashSet;
+
 use crate::data::number_types::nonzero::Nonzero;
 
 /// Reduce the size of the vector by removing values.
@@ -114,9 +115,10 @@ pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
 
 #[cfg(test)]
 mod test {
-    use crate::algorithm::utilities::{remove_indices, remove_sparse_indices, merge_sparse_indices};
-    use std::ops::Add;
     use std::convert::identity;
+    use std::ops::Add;
+
+    use crate::algorithm::utilities::{merge_sparse_indices, remove_indices, remove_sparse_indices};
 
     #[test]
     fn test_remove_indices() {

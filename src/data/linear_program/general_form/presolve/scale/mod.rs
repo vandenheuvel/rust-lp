@@ -1,6 +1,7 @@
-use crate::data::linear_program::general_form::GeneralForm;
-use crate::data::linear_algebra::traits::{SparseElement, SparseComparator};
 use num::One;
+
+use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
+use crate::data::linear_program::general_form::GeneralForm;
 
 mod rational;
 

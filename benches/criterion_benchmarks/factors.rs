@@ -1,5 +1,6 @@
 use criterion::{black_box, Criterion, criterion_group};
-use rust_lp::data::number_types::traits::factorization::{NonzeroFactorization, NonzeroFactorizable};
+
+use rust_lp::data::number_types::traits::factorization::{NonzeroFactorizable, NonzeroFactorization};
 
 pub fn factor_small(c: &mut Criterion) {
     c.bench_function("factorize a small number", |b| b.iter(|| {

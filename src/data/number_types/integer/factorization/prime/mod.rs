@@ -6,8 +6,9 @@
 //! precomputed parameter that can be used with a standard check to see whether the number is a
 //! probable prime. their computational work ensures that for the values in the bucket and the
 //! provided parameter, the probable primes correspond exactly to the true primes.
-use crate::data::number_types::integer::factorization::prime::buckets::{BUCKETS_32, BUCKETS_64};
 use num::Integer;
+
+use crate::data::number_types::integer::factorization::prime::buckets::{BUCKETS_32, BUCKETS_64};
 use crate::data::number_types::nonzero::Nonzero;
 
 mod buckets;

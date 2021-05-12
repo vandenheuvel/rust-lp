@@ -4,12 +4,15 @@
 //! applying the changes proposed. This module contains data structures and logic for presolving.
 use std::iter::Iterator;
 
+pub use scale::Scalable as Prescalable;
+
 use crate::data::linear_algebra::traits::SparseElement;
 use crate::data::linear_program::elements::{BoundDirection, LinearProgramType, RangedConstraintRelation};
 use crate::data::linear_program::general_form::{GeneralForm, RemovedVariable};
 use crate::data::linear_program::general_form::presolve::counters::Counters;
 use crate::data::linear_program::general_form::presolve::queues::Queues;
 use crate::data::linear_program::general_form::presolve::updates::Updates;
+use crate::data::number_types::nonzero::NonzeroSign;
 use crate::data::number_types::traits::{Field, OrderedField, OrderedFieldRef};
 
 mod rule;
@@ -17,8 +20,6 @@ mod queues;
 pub(super) mod updates;
 mod counters;
 pub(super) mod scale;
-pub use scale::Scalable as Prescalable;
-use crate::data::number_types::nonzero::NonzeroSign;
 
 /// Container data structure to keep track of presolve status.
 ///

@@ -1,17 +1,17 @@
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
-use std::ops::{Add, AddAssign, Sub, DivAssign, MulAssign, Div};
+use std::ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub};
 
 use itertools::izip;
 use num::{One, Zero};
+use num::traits::Pow;
 
 use crate::data::linear_algebra::SparseTuple;
 use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::linear_program::general_form::GeneralForm;
 use crate::data::linear_program::general_form::presolve::scale::{Scalable, ScaleInfo};
 use crate::data::number_types::traits::factorization::{NonzeroFactorizable, NonzeroFactorization};
-use num::traits::Pow;
 
 impl<R> Scalable<R> for GeneralForm<R>
 where
@@ -341,10 +341,10 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::data::linear_program::general_form::{GeneralForm, Variable};
-    use crate::data::linear_program::elements::{Objective, RangedConstraintRelation, VariableType};
-    use crate::data::linear_algebra::matrix::{Sparse as SparseMatrix, ColumnMajor, Order};
+    use crate::data::linear_algebra::matrix::{ColumnMajor, Order, Sparse as SparseMatrix};
     use crate::data::linear_algebra::vector::{DenseVector, Vector};
+    use crate::data::linear_program::elements::{Objective, RangedConstraintRelation, VariableType};
+    use crate::data::linear_program::general_form::{GeneralForm, Variable};
 
     #[test]
     fn test_factorize() {

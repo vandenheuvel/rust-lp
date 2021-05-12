@@ -14,6 +14,7 @@
 //! copy of the constraint matrix using references, rather than the actual values.
 use std::borrow::Borrow;
 use std::fmt::{Debug, Display};
+
 use crate::data::number_types::nonzero::Nonzero;
 
 /// Element of a `Vector` of `Matrix` type.

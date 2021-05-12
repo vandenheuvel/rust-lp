@@ -5,8 +5,8 @@ use crate::data::linear_algebra::traits::SparseElement;
 use crate::data::linear_program::elements::{BoundDirection, LinearProgramType, RangedConstraintRelation};
 use crate::data::linear_program::general_form::presolve::Index;
 use crate::data::linear_program::general_form::presolve::updates::BoundChange;
-use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 use crate::data::number_types::nonzero::NonzeroSign;
+use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 
 impl<'a, OF> Index<'a, OF>
 where

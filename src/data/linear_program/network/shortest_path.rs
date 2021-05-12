@@ -9,8 +9,8 @@ use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::network::representation::ArcIncidenceColumn;
 use crate::data::linear_program::network::representation::ArcIncidenceMatrix;
 use crate::data::number_types::binary::Binary;
-use crate::data::number_types::traits::Field;
 use crate::data::number_types::nonzero::Nonzero;
+use crate::data::number_types::traits::Field;
 
 /// Solving a shortest path problem as a linear program.
 #[derive(Debug, Clone, PartialEq)]

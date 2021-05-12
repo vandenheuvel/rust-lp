@@ -16,8 +16,8 @@ use crate::data::linear_algebra::traits::{Element, SparseComparator, SparseEleme
 use crate::data::linear_algebra::vector::{DenseVector, SparseVector, Vector};
 use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::general_form::Variable;
-use crate::data::number_types::traits::{Field, FieldRef};
 use crate::data::number_types::nonzero::Nonzero;
+use crate::data::number_types::traits::{Field, FieldRef};
 
 /// The `MatrixData` struct represents variables in 6 different categories.
 ///

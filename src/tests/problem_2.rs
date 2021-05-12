@@ -18,10 +18,10 @@ use crate::data::linear_algebra::vector::{DenseVector, SparseVector};
 use crate::data::linear_algebra::vector::test::TestVector;
 use crate::data::linear_program::elements::VariableType;
 use crate::data::linear_program::general_form::Variable;
+use crate::data::number_types::nonzero::Nonzero;
 use crate::data::number_types::rational::{Rational64, RationalBig};
 use crate::data::number_types::traits::Field;
 use crate::RB;
-use crate::data::number_types::nonzero::Nonzero;
 
 type T = Rational64;
 type S = RationalBig;

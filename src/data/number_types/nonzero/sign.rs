@@ -1,12 +1,12 @@
 //! # Signs of nonzero values
 //!
 //! Usual sign implementations have a sign for zero, the implementation in this module does not.
-use std::ops::{Mul};
+use std::cmp::Ordering;
+use std::ops::Mul;
 
 use num::Zero;
 
 use crate::data::number_types::nonzero::Nonzero;
-use std::cmp::Ordering;
 
 /// A signed number that can have a nonzero value.
 pub trait NonzeroSigned: Nonzero + Clone {

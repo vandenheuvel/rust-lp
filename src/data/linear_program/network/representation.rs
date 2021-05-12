@@ -13,9 +13,9 @@ use crate::data::linear_algebra::matrix::{ColumnMajor, Order, Sparse as SparseMa
 use crate::data::linear_algebra::SparseTuple;
 use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::linear_algebra::vector::{DenseVector, Vector};
+use crate::data::number_types::nonzero::Nonzero;
 use crate::data::number_types::rational::RationalBig;
 use crate::data::number_types::traits::Field;
-use crate::data::number_types::nonzero::Nonzero;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArcIncidenceMatrix {

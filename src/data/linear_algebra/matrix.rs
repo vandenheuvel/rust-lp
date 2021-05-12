@@ -13,8 +13,8 @@ use num::{FromPrimitive, ToPrimitive};
 use crate::algorithm::utilities::{remove_indices, remove_sparse_indices};
 use crate::data::linear_algebra::{SparseTuple, SparseTupleVec};
 use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
-use crate::data::number_types::traits::Field;
 use crate::data::number_types::nonzero::Nonzero;
+use crate::data::number_types::traits::Field;
 
 /// Indices start at `0`.
 /// TODO(OPTIMIZATION): What data structure is best suited to back this struct? How are allocations

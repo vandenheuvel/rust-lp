@@ -25,8 +25,8 @@ use crate::data::linear_program::general_form::presolve::scale::Scalable;
 use crate::data::linear_program::general_form::presolve::updates::Changes;
 use crate::data::linear_program::general_form::RemovedVariable::{FunctionOfOthers, Solved};
 use crate::data::linear_program::solution::Solution;
-use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 use crate::data::number_types::nonzero::Nonzero;
+use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 
 mod presolve;
 

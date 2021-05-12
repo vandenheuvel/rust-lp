@@ -16,8 +16,8 @@ use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::linear_algebra::vector::{DenseVector, SparseVector};
 use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::network::representation::{ArcDirection, ArcIncidenceMatrix};
-use crate::data::number_types::rational::RationalBig;
 use crate::data::number_types::nonzero::Nonzero;
+use crate::data::number_types::rational::RationalBig;
 
 /// Maximum flow problem.
 struct Primal<F> {

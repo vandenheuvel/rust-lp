@@ -5,8 +5,10 @@
 //! this type can be modified and specialized as needed.
 use std::fmt::{Debug, Formatter};
 use std::fmt;
-use crate::data::number_types::nonzero::Nonzero;
+
 use num::Zero;
+
+use crate::data::number_types::nonzero::Nonzero;
 
 mod with_fixed_size_integer;
 mod with_binary;

@@ -9,12 +9,12 @@ use std::path::Path;
 
 use num::{One, Zero};
 
-use crate::data::linear_algebra::traits::{Element};
+use crate::data::linear_algebra::traits::Element;
 use crate::data::linear_program::general_form::GeneralForm;
+use crate::data::number_types::nonzero::Nonzero;
 use crate::data::number_types::rational::Rational64;
 use crate::io::error::{Import, Inconsistency};
 use crate::io::mps::MPS;
-use crate::data::number_types::nonzero::Nonzero;
 
 pub mod error;
 pub mod mps;
