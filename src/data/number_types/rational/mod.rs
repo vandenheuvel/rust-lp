@@ -14,14 +14,14 @@ mod macros;
 mod factorization;
 
 /// Ratio between two numbers.
-#[derive(Clone, Debug)]
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub struct Ratio<Numerator, Denominator> {
     numerator: Numerator,
     denominator: Denominator,
 }
 
 impl<T: Nonzero, S> Nonzero for Ratio<T, S> {
-    fn is_not_zero(&self) -> bool {
+    default fn is_not_zero(&self) -> bool {
         self.numerator.is_not_zero()
     }
 }
