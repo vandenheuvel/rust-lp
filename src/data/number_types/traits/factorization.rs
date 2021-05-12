@@ -12,7 +12,10 @@ pub trait NonzeroFactorizable: Nonzero {
     /// Some prime greater than 1.
     type Factor: Nonzero + Ord + Clone;
     /// How often the factor appears in the number.
-    type Power: Nonzero + Clone;
+    ///
+    /// This is marked Copy, because a 64-bit power already allows for values up to 2^(2^64), which
+    /// has about 5.6 * 10^18 decimal digits.
+    type Power: Nonzero + Copy + Clone;
 
     /// Decompose into factors.
     ///

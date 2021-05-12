@@ -19,6 +19,10 @@ use relp::io::import;
 struct Opts {
     /// File containing the problem description
     problem_file: String,
+    #[clap(short, long, default_value=true)]
+    presolve: Option<bool>,
+    #[clap(short, long, default_value=true)]
+    scale: Option<bool>,
 }
 
 fn main() {

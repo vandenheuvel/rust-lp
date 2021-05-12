@@ -11,7 +11,7 @@ where
     Numerator: NonzeroFactorizable<Factor=Factor, Power=Power>,
     Denominator: NonzeroFactorizable<Factor=Factor, Power=Power>,
     Factor: Ord + Nonzero + Clone,
-    Power: Neg<Output=Power> + Sub<Output=Power> + Eq + Nonzero + Clone,
+    Power: Neg<Output=Power> + Sub<Output=Power> + Eq + Nonzero + Copy + Clone,
     Ratio<Numerator, Denominator>: Nonzero,
 {
     type Factor = Factor;

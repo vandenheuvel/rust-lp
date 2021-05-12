@@ -258,8 +258,8 @@ where
     /// # Errors
     ///
     /// In case the linear program gets solved during this presolve operation, a solution.
-    pub fn derive_matrix_data(&mut self) -> Result<MatrixData<OF>, LinearProgramType<OF>> {
-        self.standardize()?;
+    pub fn derive_matrix_data(&mut self, presolve: bool, scale: bool) -> Result<MatrixData<OF>, LinearProgramType<OF>> {
+        self.standardize(presolve, scale)?;
 
         let (
             nr_equality,
@@ -306,12 +306,16 @@ where
     /// # Errors
     ///
     /// In case the linear program gets solved during this presolve operation, a solution.
-    pub fn standardize(&mut self) -> Result<(), LinearProgramType<OF>> {
-        self.presolve()?;
+    pub fn standardize(&mut self, presolve: bool, scale: bool) -> Result<(), LinearProgramType<OF>> {
+        if presolve {
+            self.presolve()?;
+        }
         self.transform_variables();
         self.make_b_non_negative();
         self.make_minimization_problem();
-        self.scale();
+        if scale {
+            self.scale();
+        }
 
         Ok(())
     }
