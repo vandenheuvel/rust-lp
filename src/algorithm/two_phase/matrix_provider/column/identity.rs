@@ -51,33 +51,6 @@ impl Column for IdentityColumnStruct {
 impl OrderedColumn for IdentityColumnStruct {
 }
 
-/// A type representing the value `1`.
-///
-/// Can be used when a type from the `MatrixProvider` can only have the value `1`, such as perhaps
-/// in certain network problems.
-#[derive(Ord, PartialOrd, Eq, PartialEq, Clone, Debug)]
-pub struct One;
-
-impl num::One for One {
-    fn one() -> Self {
-        Self
-    }
-}
-
-impl Mul<One> for One {
-    type Output = Self;
-
-    fn mul(self, _rhs: One) -> Self::Output {
-        Self
-    }
-}
-
-impl Display for One {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("1")
-    }
-}
-
 macro_rules! define_ops {
     ($primitive:ident) => {
         impl From<One> for $primitive {

@@ -71,48 +71,6 @@ pub(crate) fn remove_sparse_indices<T>(vector: &mut Vec<(usize, T)>, indices: &[
     });
 }
 
-pub(crate) fn merge_sparse_indices<I: Ord, T: Nonzero + Eq>(
-    left: impl Iterator<Item=(I, T)> + Sized,
-    right: impl Iterator<Item=(I, T)> + Sized,
-    operation: impl Fn(T, T) -> T,
-    operation_left: impl Fn(T) -> T,
-    operation_right: impl Fn(T) -> T,
-) -> Vec<(I, T)> {
-    let mut result = Vec::with_capacity(left.size_hint().0.max(right.size_hint().0));
-
-    let mut left = left.peekable();
-    let mut right = right.peekable();
-
-    while let (Some((left_index, _)), Some((right_index, _))) = (left.peek(), right.peek()) {
-        match left_index.cmp(&right_index) {
-            Ordering::Less => {
-                let (index, value) = left.next().unwrap();
-                result.push((index, operation_left(value)));
-            },
-            Ordering::Equal => {
-                let (left_index, left_value) = left.next().unwrap();
-                let operation_result = operation(left_value, right.next().unwrap().1);
-                if operation_result.is_not_zero() {
-                    result.push((left_index, operation_result));
-                }
-            },
-            Ordering::Greater => {
-                let (index, value) = right.next().unwrap();
-                result.push((index, operation_right(value)));
-            },
-        }
-    }
-
-    for (left_index, value) in left {
-        result.push((left_index, operation_left(value)))
-    }
-    for (right_index, value) in right {
-        result.push((right_index, operation_right(value)))
-    }
-
-    result
-}
-
 #[cfg(test)]
 mod test {
     use std::convert::identity;

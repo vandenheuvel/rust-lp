@@ -76,12 +76,6 @@ pub(crate) struct Raw {
     decimal_steps_from_right: u32, // Need about 5 bits
 }
 
-#[derive(Eq, PartialEq, Clone, Debug)]
-pub(crate) enum Sign {
-    Positive,
-    Negative,
-}
-
 impl TryFrom<&str> for Raw {
     type Error = ParseError;
 
