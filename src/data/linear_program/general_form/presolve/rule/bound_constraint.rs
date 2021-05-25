@@ -1,12 +1,13 @@
 //! # Remove a constraint that is a bound on a variable.
 //!
 //! Triggered when there is only a single variable in a constraint.
+use relp_num::{OrderedField, OrderedFieldRef};
+use relp_num::NonZeroSign;
+
 use crate::data::linear_algebra::traits::SparseElement;
 use crate::data::linear_program::elements::{BoundDirection, LinearProgramType, RangedConstraintRelation};
 use crate::data::linear_program::general_form::presolve::Index;
 use crate::data::linear_program::general_form::presolve::updates::BoundChange;
-use crate::data::number_types::nonzero::NonzeroSign;
-use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 
 impl<'a, OF> Index<'a, OF>
 where
@@ -29,7 +30,7 @@ where
         constraint: usize,
     ) -> Result<(), LinearProgramType<OF>> {
         use RangedConstraintRelation::{Equal, Range, Less, Greater};
-        use NonzeroSign::{Positive, Negative};
+        use NonZeroSign::{Positive, Negative};
         debug_assert_eq!(self.counters.constraint[constraint], 1);
         debug_assert_eq!(self.counters.iter_active_row(constraint).count(), 1);
 

@@ -5,8 +5,8 @@
 use std::collections::HashSet;
 use std::fmt::{Debug, Display, Formatter, Result as FormatResult};
 
-use num::One;
-use num::Zero;
+use num_traits::One;
+use num_traits::Zero;
 
 use crate::algorithm::two_phase::matrix_provider::column::Column;
 use crate::algorithm::two_phase::tableau::inverse_maintenance::{ColumnComputationInfo, InverseMaintener, ops as im_ops};
@@ -358,7 +358,8 @@ where
 mod test {
     use std::collections::HashSet;
 
-    use num::FromPrimitive;
+    use relp_num::{Rational64, RationalBig};
+    use relp_num::RB;
 
     use crate::algorithm::two_phase::matrix_provider::matrix_data::MatrixData;
     use crate::algorithm::two_phase::strategy::pivot_rule::{FirstProfitable, PivotRule};
@@ -369,8 +370,6 @@ mod test {
     use crate::algorithm::two_phase::tableau::Tableau;
     use crate::data::linear_algebra::vector::{DenseVector, SparseVector};
     use crate::data::linear_algebra::vector::test::TestVector;
-    use crate::data::number_types::rational::{Rational64, RationalBig};
-    use crate::RB;
     use crate::tests::problem_2::{artificial_tableau_form, create_matrix_data_data, matrix_data_form};
 
     type T = Rational64;

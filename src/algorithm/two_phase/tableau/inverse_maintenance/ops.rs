@@ -6,16 +6,16 @@ use std::fmt::{Debug, Display};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use num::{One, Zero};
+use num_traits::{One, Zero};
+use relp_num;
+use relp_num::NonZero;
 
-use crate::algorithm::two_phase::matrix_provider::column::identity;
 use crate::data::linear_algebra::traits::SparseElement;
-use crate::data::number_types::nonzero::Nonzero;
 
 /// Operations done by the number type within the inverse maintenance algorithm.
 pub trait Field =
     Zero +
-    Nonzero +
+    NonZero +
     One +
 
     Neg<Output=Self> +
@@ -40,7 +40,7 @@ pub trait Field =
 
     Sum +
 
-    Column<identity::One> +
+    Column<relp_num::One> +
 
     Eq +
     PartialEq +

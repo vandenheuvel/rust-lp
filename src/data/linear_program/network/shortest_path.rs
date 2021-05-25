@@ -1,6 +1,10 @@
 //! # Shortest path problem
 use std::fmt::{Display, Formatter, Result as FormatResult};
 
+use relp_num::Binary;
+use relp_num::Field;
+use relp_num::NonZero;
+
 use crate::algorithm::two_phase::matrix_provider::column::Column;
 use crate::algorithm::two_phase::matrix_provider::MatrixProvider;
 use crate::data::linear_algebra::matrix::{ColumnMajor, Sparse as SparseMatrix};
@@ -8,9 +12,6 @@ use crate::data::linear_algebra::vector::{DenseVector, SparseVector};
 use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::network::representation::ArcIncidenceColumn;
 use crate::data::linear_program::network::representation::ArcIncidenceMatrix;
-use crate::data::number_types::binary::Binary;
-use crate::data::number_types::nonzero::Nonzero;
-use crate::data::number_types::traits::Field;
 
 /// Solving a shortest path problem as a linear program.
 #[derive(Debug, Clone, PartialEq)]
@@ -27,7 +28,7 @@ struct Primal<F> {
 
 impl<F> Primal<F>
 where
-    F: Field + Nonzero,
+    F: Field + NonZero,
 {
     pub fn new(
         adjacency_matrix: SparseMatrix<F, F, ColumnMajor>,
@@ -61,7 +62,7 @@ where
 
 impl<F: 'static> MatrixProvider for Primal<F>
 where
-    F: Field + Nonzero,
+    F: Field + NonZero,
 {
     type Column = ArcIncidenceColumn;
     type Cost<'a> = &'a F;
@@ -114,7 +115,7 @@ where
 
 impl<F: 'static> Display for Primal<F>
 where
-    F: Field + Nonzero,
+    F: Field + NonZero,
 {
     fn fmt(&self, f: &mut Formatter) -> FormatResult {
         writeln!(f, "Shortest Path Network")?;
@@ -144,6 +145,8 @@ where
 
 #[cfg(test)]
 mod test {
+    use relp_num::{Rational64, RationalBig};
+
     use crate::algorithm::{OptimizationResult, SolveRelaxation};
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::basis_inverse_rows::BasisInverseRows;
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
@@ -151,7 +154,6 @@ mod test {
     use crate::data::linear_algebra::vector::SparseVector;
     use crate::data::linear_algebra::vector::test::TestVector;
     use crate::data::linear_program::network::shortest_path::Primal;
-    use crate::data::number_types::rational::{Rational64, RationalBig};
 
     #[test]
     fn test_1() {

@@ -5,6 +5,8 @@
 //! artificial variables out of the basis.
 use std::collections::HashSet;
 
+use relp_num::Binary;
+
 use crate::algorithm::two_phase::matrix_provider::column::Column;
 use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumn;
 use crate::algorithm::two_phase::tableau::inverse_maintenance::{InverseMaintener, ops as im_ops};
@@ -20,12 +22,10 @@ pub mod partially;
 /// variables have cost `One`. Variables in the artificial tableau that are not artificial (and
 /// should not be minimized out of the basis) have artificial cost `Zero` (although they might have
 /// a non-artificial cost).
-pub enum Cost {
-    /// Artificial cost of the non-artificial variables.
-    Zero,
-    /// Artificial cost of the artificial variables.
-    One,
-}
+///
+/// Artificial cost of the non-artificial variables is zero, artificial cost of the artificial
+/// variables is one.
+pub type Cost = Binary;
 
 /// Tableaus with artificial variables.
 ///

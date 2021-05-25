@@ -4,18 +4,18 @@ use std::hash::Hash;
 use std::ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub};
 
 use itertools::izip;
-use num::{One, Zero};
-use num::traits::Pow;
+use num_traits::{One, Zero};
+use num_traits::Pow;
+use relp_num::{NonZeroFactorizable, NonZeroFactorization};
 
 use crate::data::linear_algebra::SparseTuple;
 use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::linear_program::general_form::GeneralForm;
 use crate::data::linear_program::general_form::presolve::scale::{Scalable, ScaleInfo};
-use crate::data::number_types::traits::factorization::{NonzeroFactorizable, NonzeroFactorization};
 
 impl<R> Scalable<R> for GeneralForm<R>
 where
-    R: NonzeroFactorizable + DivAssign<R::Factor> + MulAssign<R::Factor> + MulAssign<R> + One + SparseElement<R> + SparseComparator,
+    R: NonZeroFactorizable + DivAssign<R::Factor> + MulAssign<R::Factor> + MulAssign<R> + One + SparseElement<R> + SparseComparator,
     R::Factor: Hash + Pow<R::Power, Output=R::Factor>,
     R::Power: Sub<Output=R::Power> + Add<Output=R::Power> + Zero + One + AddAssign + Ord,
     for<'r> &'r R: Div<&'r R, Output=R>,
@@ -187,7 +187,7 @@ where
     }
 }
 
-struct Factorization<R: NonzeroFactorizable> {
+struct Factorization<R: NonZeroFactorizable> {
     /// No duplicate elements
     all_factors: Vec<R::Factor>,
     /// Zero values are None, others have a factorization that might be empty
@@ -197,7 +197,7 @@ struct Factorization<R: NonzeroFactorizable> {
     A: Vec<Vec<SparseTuple<Vec<(R::Factor, R::Power)>>>>,
 }
 
-impl<R: NonzeroFactorizable<Factor: Hash, Power: Zero + Ord>> Factorization<R> {
+impl<R: NonZeroFactorizable<Factor: Hash, Power: Zero + Ord>> Factorization<R> {
     fn split_into_factors(self) -> Vec<(R::Factor, PerFactor<R::Power>)> {
         let number_of_factors = self.all_factors.len();
         let nr_rows = self.b.len();
@@ -284,7 +284,7 @@ impl<R: NonzeroFactorizable<Factor: Hash, Power: Zero + Ord>> Factorization<R> {
 
 impl<R> GeneralForm<R>
 where
-    R: NonzeroFactorizable<Factor: Hash> + SparseElement<R> + SparseComparator,
+    R: NonZeroFactorizable<Factor: Hash> + SparseElement<R> + SparseComparator,
 {
     fn factorize(&self) -> Factorization<R> {
         let mut all_factors = HashSet::new();
@@ -293,7 +293,7 @@ where
         let b = self.b.data.iter()
             .map(|v| {
                 if v.is_not_zero() {
-                    let NonzeroFactorization { factors, .. } = v.factorize();
+                    let NonZeroFactorization { factors, .. } = v.factorize();
                     for (factor, _count) in &factors {
                         if all_factors.insert(factor.clone()) {
                             all_factors_vec.push(factor.clone());
@@ -308,7 +308,7 @@ where
 
         let c = self.variables.iter()
             .map(|variable| {
-                let NonzeroFactorization { factors, .. } = variable.cost.factorize();
+                let NonZeroFactorization { factors, .. } = variable.cost.factorize();
                 for (factor, _count) in &factors {
                     if all_factors.insert(factor.clone()) {
                         all_factors_vec.push(factor.clone());
@@ -320,7 +320,7 @@ where
 
         let A = self.constraints.iter_columns().map(|column| {
             column.iter().map(|(i, v)| {
-                let NonzeroFactorization { factors, .. } = v.factorize();
+                let NonZeroFactorization { factors, .. } = v.factorize();
                 for (factor, _count) in &factors {
                     if all_factors.insert(factor.clone()) {
                         all_factors_vec.push(factor.clone());

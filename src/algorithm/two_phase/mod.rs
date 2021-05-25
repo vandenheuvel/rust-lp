@@ -114,9 +114,9 @@ where
 
 #[cfg(test)]
 mod test {
-    use num::FromPrimitive;
+    use relp_num::{R64, RB};
+    use relp_num::{Rational64, RationalBig};
 
-    use crate::{R64, RB};
     use crate::algorithm::{OptimizationResult, SolveRelaxation};
     use crate::algorithm::two_phase::matrix_provider::matrix_data::MatrixData;
     use crate::algorithm::two_phase::phase_two;
@@ -128,7 +128,6 @@ mod test {
     use crate::data::linear_algebra::vector::test::TestVector;
     use crate::data::linear_program::elements::VariableType;
     use crate::data::linear_program::general_form::Variable;
-    use crate::data::number_types::rational::{Rational64, RationalBig};
     use crate::tests::problem_2::{create_matrix_data_data, matrix_data_form, tableau_form};
 
     #[test]

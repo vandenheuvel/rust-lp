@@ -7,12 +7,12 @@ use std::io::Read;
 use std::ops::{Add, Neg};
 use std::path::Path;
 
-use num::{One, Zero};
+use num_traits::{One, Zero};
+use relp_num::NonZero;
+use relp_num::Rational64;
 
 use crate::data::linear_algebra::traits::Element;
 use crate::data::linear_program::general_form::GeneralForm;
-use crate::data::number_types::nonzero::Nonzero;
-use crate::data::number_types::rational::Rational64;
 use crate::io::error::{Import, Inconsistency};
 use crate::io::mps::MPS;
 
@@ -30,7 +30,7 @@ pub mod mps;
 ///
 /// When a file extension is unknown, a file cannot be found or read, there is an inconsistency in
 /// the problem file, etc. an error type is returned.
-pub fn import<F: From<Rational64> + Zero + One + Neg<Output=F> + Ord + Element + Nonzero>(
+pub fn import<F: From<Rational64> + Zero + One + Neg<Output=F> + Ord + Element + NonZero>(
     file_path: &Path
 ) -> Result<impl TryInto<GeneralForm<F>, Error=Inconsistency>, Import>
 where
@@ -70,7 +70,7 @@ enum DataTypes {
 
 impl<F> TryInto<GeneralForm<F>> for DataTypes
 where
-    F: From<Rational64> + Nonzero + Zero + One + Neg<Output=F> + Ord + Element,
+    F: From<Rational64> + NonZero + Zero + One + Neg<Output=F> + Ord + Element,
     for<'r> F: Add<&'r F, Output=F>,
     for<'r> &'r F: Neg<Output=F>,
 {

@@ -1,4 +1,4 @@
-use num::One;
+use num_traits::One;
 
 use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::linear_program::general_form::GeneralForm;

@@ -1,6 +1,10 @@
 use std::collections::HashSet;
 
-use num::FromPrimitive;
+use num_traits::FromPrimitive;
+use relp_num::{Rational64, RationalBig};
+use relp_num::Field;
+use relp_num::NonZero;
+use relp_num::RB;
 
 use crate::algorithm::OptimizationResult;
 use crate::algorithm::two_phase::{phase_one, phase_two};
@@ -18,10 +22,6 @@ use crate::data::linear_algebra::vector::{DenseVector, SparseVector};
 use crate::data::linear_algebra::vector::test::TestVector;
 use crate::data::linear_program::elements::VariableType;
 use crate::data::linear_program::general_form::Variable;
-use crate::data::number_types::nonzero::Nonzero;
-use crate::data::number_types::rational::{Rational64, RationalBig};
-use crate::data::number_types::traits::Field;
-use crate::RB;
 
 type T = Rational64;
 type S = RationalBig;
@@ -67,7 +67,7 @@ fn conversion_pipeline() {
     ], 5)));
 }
 
-pub fn create_matrix_data_data<T: Field + FromPrimitive + Nonzero>(
+pub fn create_matrix_data_data<T: Field + FromPrimitive + NonZero>(
 ) -> (Sparse<T, T, ColumnMajor>, DenseVector<T>, Vec<Variable<T>>) {
     let constraints = ColumnMajor::from_test_data(
         &vec![

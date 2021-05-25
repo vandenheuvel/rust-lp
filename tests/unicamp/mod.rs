@@ -5,7 +5,7 @@ use std::convert::TryInto;
 use std::ops::{Add, AddAssign, Sub};
 use std::path::{Path, PathBuf};
 
-use num::{One, Zero};
+use num_traits::{One, Zero};
 
 use relp::algorithm::{OptimizationResult, SolveRelaxation};
 use relp::algorithm::two_phase::matrix_provider::MatrixProvider;

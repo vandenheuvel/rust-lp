@@ -3,7 +3,9 @@
 //! From https://en.wikipedia.org/w/index.php?title=MPS_(format)&oldid=941892011
 use std::convert::TryInto;
 
-use num::FromPrimitive;
+use relp_num::{Rational64, RationalBig};
+use relp_num::R64;
+use relp_num::RB;
 
 use crate::algorithm::OptimizationResult;
 use crate::algorithm::two_phase::{phase_one, phase_two};
@@ -24,11 +26,8 @@ use crate::data::linear_algebra::vector::test::TestVector;
 use crate::data::linear_program::elements::{ConstraintRelation, Objective, RangedConstraintRelation, VariableType};
 use crate::data::linear_program::general_form::{GeneralForm, Variable};
 use crate::data::linear_program::general_form::Variable as GeneralFormVariable;
-use crate::data::number_types::rational::{Rational64, RationalBig};
 use crate::io::mps::{Bound, BoundType, Column, MPS, Rhs, Row};
 use crate::io::mps::parse;
-use crate::R64;
-use crate::RB;
 
 type T = Rational64;
 type S = RationalBig;

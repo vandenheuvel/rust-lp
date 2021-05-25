@@ -7,10 +7,10 @@ use relp::algorithm::two_phase::matrix_provider::MatrixProvider;
 use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
 use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::LUDecomposition;
 use relp::data::linear_program::general_form::GeneralForm;
-use relp::data::number_types::rational::{Rational64, RationalBig};
-use relp::data::number_types::traits::Abs;
+use relp_num::{Rational64, RationalBig};
+use relp_num::Abs;
 use relp::io::import;
-use relp::RB;
+use relp_num::RB;
 
 use crate::cook::get_test_file_path;
 

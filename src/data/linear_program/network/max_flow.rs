@@ -2,7 +2,10 @@
 use std::iter;
 use std::ops::{Add, Mul, Range};
 
-use num::Zero;
+use num_traits::Zero;
+use relp_num::NonZero;
+use relp_num::One;
+use relp_num::RationalBig;
 
 use crate::algorithm::two_phase::matrix_provider::column::{Column as ColumnTrait, OrderedColumn};
 use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumn;
@@ -16,8 +19,6 @@ use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::linear_algebra::vector::{DenseVector, SparseVector};
 use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::network::representation::{ArcDirection, ArcIncidenceMatrix};
-use crate::data::number_types::nonzero::Nonzero;
-use crate::data::number_types::rational::RationalBig;
 
 /// Maximum flow problem.
 struct Primal<F> {
@@ -122,7 +123,7 @@ impl IntoFilteredColumn for Column {
 
 impl<F> MatrixProvider for Primal<F>
 where
-    F: SparseElement<F> + Zero + Eq + Nonzero,
+    F: SparseElement<F> + Zero + Eq + NonZero,
 {
     type Column = Column;
     type Cost<'a> = Cost;
@@ -193,7 +194,7 @@ where
 
 impl<F> PartialInitialBasis for Primal<F>
 where
-    F: SparseElement<F> + Zero + Eq + Nonzero,
+    F: SparseElement<F> + Zero + Eq + NonZero,
 {
     fn pivot_element_indices(&self) -> Vec<(usize, usize)> {
         (0..self.nr_edges()).map(|j| (j + self.nr_constraints(), self.nr_edges() + j)).collect()
@@ -211,8 +212,7 @@ impl Add<Cost> for RationalBig {
         match rhs {
             Cost::Zero => self,
             Cost::MinusOne => {
-                let (numer, denom): (num::BigInt, num::BigInt) = self.0.into();
-                Self(num::BigRational::new(numer - &denom, denom))
+                self - One
             }
         }
     }
@@ -242,6 +242,8 @@ impl Mul<Cost> for RationalBig {
 
 #[cfg(test)]
 mod test {
+    use relp_num::{Rational64, RationalBig};
+
     use crate::algorithm::{OptimizationResult, SolveRelaxation};
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::basis_inverse_rows::BasisInverseRows;
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
@@ -249,7 +251,6 @@ mod test {
     use crate::data::linear_algebra::vector::SparseVector;
     use crate::data::linear_algebra::vector::test::TestVector;
     use crate::data::linear_program::network::max_flow::Primal;
-    use crate::data::number_types::rational::{Rational64, RationalBig};
 
     #[test]
     fn test_1() {

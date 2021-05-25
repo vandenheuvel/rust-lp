@@ -8,13 +8,13 @@ use std::collections::HashSet;
 use std::iter::Iterator;
 use std::marker::PhantomData;
 
-use num::{FromPrimitive, ToPrimitive};
+use num_traits::{FromPrimitive, ToPrimitive};
+use relp_num::Field;
+use relp_num::NonZero;
 
 use crate::algorithm::utilities::{remove_indices, remove_sparse_indices};
 use crate::data::linear_algebra::{SparseTuple, SparseTupleVec};
 use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
-use crate::data::number_types::nonzero::Nonzero;
-use crate::data::number_types::traits::Field;
 
 /// Indices start at `0`.
 /// TODO(OPTIMIZATION): What data structure is best suited to back this struct? How are allocations
@@ -50,7 +50,7 @@ pub trait Order: Sized {
     ///
     /// Note that the numerics might not be exact due to intermediate casting to floats, for
     /// convenience in other places of the code base.
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + Nonzero>(
+    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NonZero>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>
@@ -89,7 +89,7 @@ impl Order for RowMajor {
         Sparse::from_major_ordered_tuples(rows, nr_rows, nr_columns)
     }
 
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + Nonzero>(
+    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NonZero>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>
@@ -135,7 +135,7 @@ impl Order for ColumnMajor {
         Sparse::from_major_ordered_tuples(columns, nr_columns, nr_rows)
     }
 
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + Nonzero>(
+    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NonZero>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>
@@ -560,13 +560,13 @@ where
 
 #[cfg(test)]
 pub mod test {
-    use num::FromPrimitive;
+    use num_traits::FromPrimitive;
+    use relp_num::Field;
+    use relp_num::R32;
+    use relp_num::Rational32;
 
     use crate::data::linear_algebra::matrix::{ColumnMajor, Order, Sparse};
     use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
-    use crate::data::number_types::rational::Rational32;
-    use crate::data::number_types::traits::Field;
-    use crate::R32;
 
     type T = Rational32;
 

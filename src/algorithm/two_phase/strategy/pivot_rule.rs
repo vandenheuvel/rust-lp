@@ -3,7 +3,7 @@
 //! Strategies for moving from basis to basis, whether primal or dual.
 use std::ops::Range;
 
-use num::Zero;
+use num_traits::Zero;
 
 use crate::algorithm::two_phase::matrix_provider::column::Column;
 use crate::algorithm::two_phase::tableau::inverse_maintenance::{InverseMaintener, ops as im_ops};

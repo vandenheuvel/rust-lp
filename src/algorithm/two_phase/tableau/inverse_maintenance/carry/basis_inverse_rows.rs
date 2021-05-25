@@ -6,8 +6,10 @@
 use std::cmp::Ordering;
 use std::fmt;
 
+use relp_num::One;
+
 use crate::algorithm::two_phase::matrix_provider::column::{Column, OrderedColumn};
-use crate::algorithm::two_phase::matrix_provider::column::identity::{IdentityColumnStruct, One};
+use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumnStruct;
 use crate::algorithm::two_phase::tableau::inverse_maintenance::{ColumnComputationInfo, ops};
 use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::{BasisInverse, RemoveBasisPart};
 use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::LUDecomposition;
@@ -247,14 +249,13 @@ where
 
 #[cfg(test)]
 mod test {
-    use num::FromPrimitive;
+    use relp_num::RationalBig;
+    use relp_num::RB;
 
     use crate::algorithm::two_phase::matrix_provider::matrix_data;
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::basis_inverse_rows::BasisInverseRows;
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::BasisInverse;
     use crate::data::linear_algebra::vector::{SparseVector, Vector};
-    use crate::data::number_types::rational::RationalBig;
-    use crate::RB;
 
     #[test]
     fn invert_identity() {

@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::ops::{Neg, SubAssign};
 
-use num::Zero;
+use num_traits::Zero;
 
 use crate::algorithm::two_phase::tableau::inverse_maintenance::ops;
 

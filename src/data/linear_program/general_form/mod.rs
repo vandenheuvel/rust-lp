@@ -10,7 +10,9 @@ use std::ops::{Add, AddAssign, Mul, Neg, Sub};
 use daggy::{Dag, WouldCycle};
 use daggy::petgraph::data::Element;
 use itertools::repeat_n;
-use num::Zero;
+use num_traits::Zero;
+use relp_num::{OrderedField, OrderedFieldRef};
+use relp_num::NonZero;
 
 use crate::algorithm::two_phase::matrix_provider::matrix_data::MatrixData;
 use crate::algorithm::utilities::remove_indices;
@@ -25,8 +27,6 @@ use crate::data::linear_program::general_form::presolve::scale::Scalable;
 use crate::data::linear_program::general_form::presolve::updates::Changes;
 use crate::data::linear_program::general_form::RemovedVariable::{FunctionOfOthers, Solved};
 use crate::data::linear_program::solution::Solution;
-use crate::data::number_types::nonzero::Nonzero;
-use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 
 mod presolve;
 
@@ -859,7 +859,7 @@ where
     ) -> Solution<G>
     where
         // TODO: Find a suitable trait alias to avoid this many trait bounds.
-        G: Sum + Neg<Output=G> + AddAssign<OF> + PartialEq<OF> + LinearAlgebraElement<G> + From<OF> + Eq + Ord + Zero + Nonzero,
+        G: Sum + Neg<Output=G> + AddAssign<OF> + PartialEq<OF> + LinearAlgebraElement<G> + From<OF> + Eq + Ord + Zero + NonZero,
         for<'r> G: Add<&'r OF, Output=G>,
         for<'r> &'r G: Neg<Output=G> + Mul<&'r OF, Output=G> + Add<&'r OF, Output=G> + Sub<&'r G, Output=G>,
     {
@@ -909,7 +909,7 @@ where
         reduced_solution: &SparseVector<G, G>,
     ) -> &'a G
     where
-        G: LinearAlgebraElement<G> + Zero + From<OF> + Sum + Neg<Output=G> + Nonzero,
+        G: LinearAlgebraElement<G> + Zero + From<OF> + Sum + Neg<Output=G> + NonZero,
         for<'r> G: Add<&'r OF, Output=G>,
         for<'r> &'r G: Neg<Output=G> + Mul<&'r OF, Output=G> + Add<&'r OF, Output=G> + Sub<&'r G, Output=G>,
     {
@@ -1135,15 +1135,14 @@ where
 
 #[cfg(test)]
 mod test {
-    use num::FromPrimitive;
+    use relp_num::R32;
+    use relp_num::Rational32;
 
     use crate::data::linear_algebra::matrix::{ColumnMajor, Order};
     use crate::data::linear_algebra::vector::DenseVector;
     use crate::data::linear_algebra::vector::test::TestVector;
     use crate::data::linear_program::elements::{Objective, RangedConstraintRelation, VariableType};
     use crate::data::linear_program::general_form::{GeneralForm, OriginalVariable, Variable};
-    use crate::data::number_types::rational::Rational32;
-    use crate::R32;
 
     /// Shifting a variable.
     #[test]

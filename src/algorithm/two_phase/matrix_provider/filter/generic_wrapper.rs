@@ -348,9 +348,10 @@ where
 
 #[cfg(test)]
 mod test {
+    use relp_num::Rational32;
+
     use crate::algorithm::two_phase::matrix_provider::filter::generic_wrapper::RemoveRows;
     use crate::algorithm::two_phase::matrix_provider::matrix_data::MatrixData;
-    use crate::data::number_types::rational::Rational32;
 
     #[test]
     fn get_underlying_index() {

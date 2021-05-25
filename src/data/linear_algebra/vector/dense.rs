@@ -7,7 +7,7 @@ use std::fmt;
 use std::ops::{AddAssign, Index, IndexMut, Mul};
 use std::slice::Iter;
 
-use num::Zero;
+use num_traits::Zero;
 
 use crate::algorithm::utilities::remove_indices;
 use crate::data::linear_algebra::SparseTuple;

@@ -4,4 +4,3 @@
 //! may introduce their specific data structures in `algorithm::my_algorithm`.
 pub mod linear_algebra;
 pub mod linear_program;
-pub mod number_types;

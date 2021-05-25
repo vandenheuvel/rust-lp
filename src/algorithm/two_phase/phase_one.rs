@@ -1,7 +1,7 @@
 //! # Phase one: finding a basic feasible solution
 use std::collections::HashSet;
 
-use num::Zero;
+use num_traits::Zero;
 
 use crate::algorithm::two_phase::matrix_provider::column::Column;
 use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumn;
@@ -261,6 +261,8 @@ where
 
 #[cfg(test)]
 mod test {
+    use relp_num::{Rational64, RationalBig};
+
     use crate::algorithm::two_phase::matrix_provider::matrix_data::MatrixData;
     use crate::algorithm::two_phase::phase_one::{primal, Rank, RankedFeasibilityResult};
     use crate::algorithm::two_phase::strategy::pivot_rule::FirstProfitable;
@@ -268,7 +270,6 @@ mod test {
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
     use crate::algorithm::two_phase::tableau::kind::artificial::partially::Partially;
     use crate::algorithm::two_phase::tableau::Tableau;
-    use crate::data::number_types::rational::{Rational64, RationalBig};
     use crate::tests::problem_2::{create_matrix_data_data, matrix_data_form};
 
     #[test]

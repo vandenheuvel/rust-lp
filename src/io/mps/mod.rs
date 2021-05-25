@@ -6,10 +6,11 @@
 use std::fmt::{Display, Formatter};
 use std::fmt;
 
+use relp_num::Rational64;
+
 use crate::data::linear_algebra::{SparseTuple, SparseTupleVec};
 use crate::data::linear_program::elements::{ConstraintRelation, Objective};
 use crate::data::linear_program::elements::VariableType;
-use crate::data::number_types::rational::Rational64;
 use crate::io::error::Import;
 use crate::io::mps::parse::{fixed, free};
 

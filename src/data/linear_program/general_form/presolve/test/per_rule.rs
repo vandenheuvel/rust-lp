@@ -1,4 +1,5 @@
-use num::traits::FromPrimitive;
+use relp_num::R32;
+use relp_num::Rational32;
 
 use crate::data::linear_algebra::matrix::ColumnMajor;
 use crate::data::linear_algebra::matrix::Order;
@@ -7,8 +8,6 @@ use crate::data::linear_algebra::vector::test::TestVector;
 use crate::data::linear_program::elements::{BoundDirection, LinearProgramType, Objective, VariableType};
 use crate::data::linear_program::general_form::{GeneralForm, RangedConstraintRelation, RemovedVariable, Variable};
 use crate::data::linear_program::general_form::presolve::Index;
-use crate::data::number_types::rational::Rational32;
-use crate::R32;
 
 type T = Rational32;
 

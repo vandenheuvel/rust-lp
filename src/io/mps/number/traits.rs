@@ -4,9 +4,8 @@
 use std::fmt::{Debug, Display};
 use std::ops::{Neg, Sub};
 
-use num::{One, Zero};
-
-use crate::data::number_types::traits::Abs;
+use num_traits::{One, Zero};
+use relp_num::Abs;
 
 pub trait Field =
     Zero +

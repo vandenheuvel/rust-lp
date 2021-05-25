@@ -1,10 +1,7 @@
 //! # Utilities
 //!
 //! Helper functions for algorithms.
-use std::cmp::Ordering;
 use std::collections::HashSet;
-
-use crate::data::number_types::nonzero::Nonzero;
 
 /// Reduce the size of the vector by removing values.
 ///
@@ -73,10 +70,7 @@ pub(crate) fn remove_sparse_indices<T>(vector: &mut Vec<(usize, T)>, indices: &[
 
 #[cfg(test)]
 mod test {
-    use std::convert::identity;
-    use std::ops::Add;
-
-    use crate::algorithm::utilities::{merge_sparse_indices, remove_indices, remove_sparse_indices};
+    use crate::algorithm::utilities::{remove_indices, remove_sparse_indices};
 
     #[test]
     fn test_remove_indices() {
@@ -132,48 +126,5 @@ mod test {
         let indices = vec![];
         remove_sparse_indices(&mut tuples, &indices);
         assert_eq!(tuples, vec![(1_000, 1f64)]);
-    }
-
-    #[test]
-    fn test_merge_sparse_indices() {
-        // Empty
-        let left: Vec<(i8, i16)> = vec![];
-        let right = vec![];
-
-        let result = merge_sparse_indices(left.into_iter(), right.into_iter(), Add::add, identity, identity);
-        let expected = vec![];
-        assert_eq!(result, expected);
-
-        // One empty
-        let left: Vec<(i8, i16)> = vec![(2, 1)];
-        let right = vec![];
-
-        let result = merge_sparse_indices(left.into_iter(), right.into_iter(), Add::add, identity, identity);
-        let expected = vec![(2, 1)];
-        assert_eq!(result, expected);
-
-        // Not related
-        let left = vec![(1, 6)].into_iter();
-        let right = vec![(4, 9)].into_iter();
-
-        let result = merge_sparse_indices(left, right, Add::add, identity, identity);
-        let expected = vec![(1, 6), (4, 9)];
-        assert_eq!(result, expected);
-
-        // Same index
-        let left = vec![(1, 6)].into_iter();
-        let right = vec![(1, 9)].into_iter();
-
-        let result = merge_sparse_indices(left, right, Add::add, identity, identity);
-        let expected = vec![(1, 15)];
-        assert_eq!(result, expected);
-
-        // Alternating
-        let left = vec![(1, 6), (3, 4)].into_iter();
-        let right = vec![(2, 9)].into_iter();
-
-        let result = merge_sparse_indices(left, right, Add::add, identity, identity);
-        let expected = vec![(1, 6), (2, 9), (3, 4)];
-        assert_eq!(result, expected);
     }
 }

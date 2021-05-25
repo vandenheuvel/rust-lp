@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use std::mem;
 use std::ops::{Mul, Neg, Sub};
 
-use num::Zero;
+use num_traits::Zero;
 
 use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::decomposition::pivoting::{Markowitz, PivotRule};
 use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::LUDecomposition;
@@ -39,7 +39,7 @@ where
         let mut lower_triangular_row_major = vec![Vec::new(); m - 1];
 
         // These values get smaller over time.
-        let (mut nnz_row, mut nnz_column) = count_nonzeros(&rows);
+        let (mut nnz_row, mut nnz_column) = count_non_zeros(&rows);
         let pivot_rule = Markowitz::new();
         for k in 0..m {
             let (pivot_row, pivot_column) = pivot_rule.choose_pivot(&nnz_row, &nnz_column, &rows, k);
@@ -270,7 +270,7 @@ fn swap<T>(
 /// Count the number of nonzero values in each row and column.
 ///
 /// Requires iterating over all values once.
-fn count_nonzeros<T>(rows: &[Vec<(usize, T)>]) -> (Vec<usize>, Vec<usize>) {
+fn count_non_zeros<T>(rows: &[Vec<(usize, T)>]) -> (Vec<usize>, Vec<usize>) {
     let n = rows.len();
     debug_assert!(n > 0);
     debug_assert!(rows.iter().all(|row| row.iter().all(|&(i, _)| i < n)));
@@ -300,16 +300,16 @@ fn count_nonzeros<T>(rows: &[Vec<(usize, T)>]) -> (Vec<usize>, Vec<usize>) {
 
 #[cfg(test)]
 mod test {
-    use num::FromPrimitive;
+    use relp_num::One;
+    use relp_num::RationalBig;
+    use relp_num::RB;
 
-    use crate::algorithm::two_phase::matrix_provider::column::identity::{IdentityColumnStruct, One};
+    use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumnStruct;
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::BasisInverse;
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::LUDecomposition;
     use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::permutation::FullPermutation;
     use crate::algorithm::two_phase::tableau::inverse_maintenance::ColumnComputationInfo;
     use crate::data::linear_algebra::vector::{SparseVector, Vector};
-    use crate::data::number_types::rational::RationalBig;
-    use crate::RB;
 
     #[test]
     fn identity_2() {
@@ -426,11 +426,11 @@ mod test {
     }
 
     mod subtract_multiple_of_column_from_other_column {
-        use num::FromPrimitive;
+        use num_traits::FromPrimitive;
+        use relp_num::R32;
+        use relp_num::Rational32;
 
         use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::decomposition::subtract_multiple_of_row_from_other_row;
-        use crate::data::number_types::rational::Rational32;
-        use crate::R32;
 
         #[test]
         fn empty() {

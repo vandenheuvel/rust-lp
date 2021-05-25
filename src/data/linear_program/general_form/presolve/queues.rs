@@ -3,10 +3,11 @@
 //! Rules are not directly applied, but instead queued.
 use std::collections::{HashSet, VecDeque};
 
+use relp_num::{OrderedField, OrderedFieldRef};
+
 use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::general_form::GeneralForm;
 use crate::data::linear_program::general_form::presolve::counters::Counters;
-use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 
 /// Which rules still need to be applied to which constraint or variable.
 ///

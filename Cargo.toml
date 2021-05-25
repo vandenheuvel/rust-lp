@@ -13,10 +13,10 @@ categories = ["algorithms", "science"]
 exclude = ["tests"]
 
 [dependencies]
-itertools = "0.10.0"
-num = "0.4.0"
+relp-num = { path = "../relp-num" }
 
-gcd = "2.0.1"
+itertools = "0.10.0"
+num-traits = "0.2.14"
 
 # TODO(PACKAGING): Make this an optional dependency.
 daggy = "0.7.0"  # Currently only for debug asserts

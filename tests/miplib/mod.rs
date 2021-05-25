@@ -10,16 +10,14 @@
 use std::convert::TryInto;
 use std::path::{Path, PathBuf};
 
-use num::FromPrimitive;
-
 use relp::algorithm::{OptimizationResult, SolveRelaxation};
 use relp::algorithm::two_phase::matrix_provider::MatrixProvider;
 use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::basis_inverse_rows::BasisInverseRows;
 use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
-use relp::data::number_types::rational::RationalBig;
-use relp::data::number_types::traits::Abs;
+use relp_num::RationalBig;
+use relp_num::Abs;
 use relp::io::import;
-use relp::RB;
+use relp_num::RB;
 
 /// # Generation and execution
 #[allow(missing_docs)]

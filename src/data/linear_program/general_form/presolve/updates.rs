@@ -5,12 +5,13 @@
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 
+use relp_num::{OrderedField, OrderedFieldRef};
+
 use crate::data::linear_algebra::traits::SparseElement;
 use crate::data::linear_program::elements::{BoundDirection, LinearProgramType, Objective, RangedConstraintRelation};
 use crate::data::linear_program::general_form::{GeneralForm, RemovedVariable};
 use crate::data::linear_program::general_form::presolve::counters::Counters;
 use crate::data::linear_program::general_form::presolve::is_empty_constraint_feasible;
-use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 
 /// Collection of changes that can be applied to the `GeneralForm` without changing its solution.
 ///

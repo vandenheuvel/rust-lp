@@ -2,11 +2,12 @@
 //!
 //! Adapt the right hand side for the remaining constraint and potentially, update the problem's
 //! fixed cost.
+use relp_num::{OrderedField, OrderedFieldRef};
+
 use crate::data::linear_algebra::traits::SparseElement;
 use crate::data::linear_program::elements::LinearProgramType;
 use crate::data::linear_program::general_form::presolve::Index;
 use crate::data::linear_program::general_form::RemovedVariable;
-use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 
 impl<'a, OF> Index<'a, OF>
 where

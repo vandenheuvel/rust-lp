@@ -3,8 +3,9 @@ use std::fmt;
 use std::ops::Mul;
 use std::ops::Not;
 
+use relp_num::NonZeroSign;
+
 use crate::data::linear_program::solution::Solution;
-use crate::data::number_types::nonzero::NonzeroSign;
 
 /// When a constraint can not be an equality constraint.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -145,13 +146,13 @@ impl Not for BoundDirection {
 ///
 /// * `3 x >= 2 <=> x >= 2 / 3`
 /// * `-3 x >= -2 <=> x <= 2 / 3`
-impl Mul<NonzeroSign> for BoundDirection {
+impl Mul<NonZeroSign> for BoundDirection {
     type Output = Self;
 
-    fn mul(self, other: NonzeroSign) -> Self::Output {
+    fn mul(self, other: NonZeroSign) -> Self::Output {
         match (self, other) {
-            (Self::Upper, NonzeroSign::Positive) | (Self::Lower, NonzeroSign::Negative) => Self::Upper,
-            (Self::Lower, NonzeroSign::Positive) | (Self::Upper, NonzeroSign::Negative) => Self::Lower,
+            (Self::Upper, NonZeroSign::Positive) | (Self::Lower, NonZeroSign::Negative) => Self::Upper,
+            (Self::Lower, NonZeroSign::Positive) | (Self::Upper, NonZeroSign::Negative) => Self::Lower,
         }
     }
 }

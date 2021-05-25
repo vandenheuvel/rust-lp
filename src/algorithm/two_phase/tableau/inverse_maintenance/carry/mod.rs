@@ -8,10 +8,11 @@ use std::fmt::{Display, Formatter};
 use std::fmt;
 use std::ops::Neg;
 
-use num::Zero;
+use relp_num::NonZero;
+use relp_num::One;
 
 use crate::algorithm::two_phase::matrix_provider::column::{Column, ColumnNumber, OrderedColumn, SparseColumn};
-use crate::algorithm::two_phase::matrix_provider::column::identity::{IdentityColumnStruct, One};
+use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumnStruct;
 use crate::algorithm::two_phase::matrix_provider::filter::Filtered;
 use crate::algorithm::two_phase::matrix_provider::MatrixProvider;
 use crate::algorithm::two_phase::tableau::inverse_maintenance::{ColumnComputationInfo, InverseMaintener, ops};
@@ -440,7 +441,7 @@ where
 
         let b_data = provider.right_hand_side().data
             .into_iter().enumerate()
-            .filter(|(_, v)| !v.is_zero())
+            .filter(|(_, v)| v.is_not_zero())
             .collect::<Vec<_>>();
         let b_column = SparseColumn { inner: b_data, };
         let mut b_values = vec![F::zero(); provider.nr_rows()];

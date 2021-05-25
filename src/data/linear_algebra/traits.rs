@@ -15,7 +15,7 @@
 use std::borrow::Borrow;
 use std::fmt::{Debug, Display};
 
-use crate::data::number_types::nonzero::Nonzero;
+use relp_num::NonZero;
 
 /// Element of a `Vector` of `Matrix` type.
 ///
@@ -44,5 +44,5 @@ pub trait SparseElement<Comparator> =
 pub trait SparseComparator =
     PartialEq +
     Element +
-    Nonzero +
+    NonZero +
 ;

@@ -17,7 +17,9 @@
 //! None of the "subtraction amount" variables are in the initial basis, but all of the column
 //! minimums and column maximums are, as well as the slack variable for each of the constraints that
 //! don't already contain a pivot from the column minimum or maximum.
-use num::{FromPrimitive, Zero};
+use num_traits::Zero;
+use relp_num::RationalBig;
+use relp_num::RB;
 
 use relp::algorithm::OptimizationResult;
 use relp::algorithm::two_phase::matrix_provider::matrix_data::MatrixData;
@@ -33,8 +35,6 @@ use relp::data::linear_algebra::matrix::{ColumnMajor, Order};
 use relp::data::linear_algebra::vector::{DenseVector, Vector};
 use relp::data::linear_program::elements::VariableType;
 use relp::data::linear_program::general_form::Variable;
-use relp::data::number_types::rational::RationalBig;
-use relp::RB;
 
 fn main() {
     // Needs at least one `Some` in each row.

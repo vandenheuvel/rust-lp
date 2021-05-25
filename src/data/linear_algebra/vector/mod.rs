@@ -6,13 +6,13 @@ use std::fmt::{Debug, Display};
 use std::ops::{AddAssign, Mul};
 use std::slice::Iter;
 
-use num::Zero;
+use num_traits::Zero;
+use relp_num::NonZero;
 
 pub use dense::Dense as DenseVector;
 pub use sparse::Sparse as SparseVector;
 
 use crate::data::linear_algebra::SparseTuple;
-use crate::data::number_types::nonzero::Nonzero;
 
 mod dense;
 mod sparse;
@@ -41,12 +41,12 @@ pub trait Vector<F>: PartialEq + Display + Debug {
         for<'r> &'r F: Mul<&'r G, Output=F>,
     ;
     /// Make a vector longer by one, by adding an extra value at the end of this vector.
-    fn push_value(&mut self, value: F) where F: Nonzero;
+    fn push_value(&mut self, value: F) where F: NonZero;
     /// Set the value at an index.
     ///
     /// Depending on internal representation, this can be an expensive operation (for `SparseVector`
     /// 's, the cost depends on the (lack of) sparsity.
-    fn set(&mut self, index: usize, value: F) where F: Nonzero;
+    fn set(&mut self, index: usize, value: F) where F: NonZero;
     /// Retrieve the value at an index.
     ///
     /// # Returns
@@ -72,13 +72,13 @@ pub mod test {
 
     use std::f64::EPSILON;
 
-    use num::{FromPrimitive, NumCast, ToPrimitive, Zero};
+    use num_traits::{FromPrimitive, NumCast, ToPrimitive, Zero};
+    use relp_num::{Field, FieldRef};
+    use relp_num::F;
+    use relp_num::NonZero;
 
     use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
     use crate::data::linear_algebra::vector::{DenseVector, SparseVector, Vector};
-    use crate::data::number_types::nonzero::Nonzero;
-    use crate::data::number_types::traits::{Field, FieldRef};
-    use crate::F;
 
     pub trait TestVector<F>: Vector<F> {
         fn from_test_data<T: ToPrimitive + Zero>(data: Vec<T>) -> Self;
@@ -141,7 +141,7 @@ pub mod test {
     }
 
     /// Test
-    fn push_value<F: Field + FromPrimitive + Nonzero, V: TestVector<F>>() where for<'r> &'r F: FieldRef<F> {
+    fn push_value<F: Field + FromPrimitive + NonZero, V: TestVector<F>>() where for<'r> &'r F: FieldRef<F> {
         let mut v = get_test_vector::<F, V>();
         let len = v.len();
         let new_v = F!(1);
@@ -152,7 +152,7 @@ pub mod test {
     }
 
     /// Test
-    fn get_set<F: Field + FromPrimitive + Nonzero, V: TestVector<F>>() {
+    fn get_set<F: Field + FromPrimitive + NonZero, V: TestVector<F>>() {
         let mut v = get_test_vector::<F, V>();
 
         // Getting a nonzero value
@@ -182,7 +182,7 @@ pub mod test {
     }
 
     /// Test
-    fn out_of_bounds_set<F: Field + FromPrimitive + Nonzero, V: TestVector<F>>() {
+    fn out_of_bounds_set<F: Field + FromPrimitive + NonZero, V: TestVector<F>>() {
         let mut v = get_test_vector::<F, V>();
 
         v.set(400, F!(45));
@@ -197,14 +197,13 @@ pub mod test {
 
     #[cfg(test)]
     mod dense_vector {
-        use num::traits::FromPrimitive;
-        use num::Zero;
+        use num_traits::{FromPrimitive, Zero};
+        use relp_num::{F, R32};
+        use relp_num::{Rational32, Rational64};
+        use relp_num::Field;
 
-        use crate::{F, R32};
         use crate::data::linear_algebra::vector::{DenseVector, Vector};
         use crate::data::linear_algebra::vector::test::{get_set, get_test_vector, len, out_of_bounds_get, out_of_bounds_set, push_value, TestVector};
-        use crate::data::number_types::rational::{Rational32, Rational64};
-        use crate::data::number_types::traits::Field;
 
         type T = Rational32;
 
@@ -288,12 +287,12 @@ pub mod test {
 
     #[cfg(test)]
     mod sparse_vector {
-        use num::FromPrimitive;
+        use num_traits::FromPrimitive;
+        use relp_num::R32;
+        use relp_num::Rational32;
 
         use crate::data::linear_algebra::vector::{SparseVector, Vector};
         use crate::data::linear_algebra::vector::test::{get_set, get_test_vector, len, out_of_bounds_get, out_of_bounds_set, push_value, TestVector};
-        use crate::data::number_types::rational::Rational32;
-        use crate::R32;
 
         type T = Rational32;
 

@@ -1,8 +1,6 @@
-use num::FromPrimitive;
-
 use relp::data::linear_program::solution::Solution;
-use relp::data::number_types::rational::{Rational64, RationalBig};
-use relp::RB;
+use relp_num::{Rational64, RationalBig};
+use relp_num::RB;
 
 use crate::unicamp::solve;
 

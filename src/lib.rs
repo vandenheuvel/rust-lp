@@ -20,9 +20,6 @@
 #![feature(result_into_ok_or_err)]
 #![feature(label_break_value)]
 
-extern crate daggy;
-extern crate num;
-
 pub mod algorithm;
 pub mod data;
 pub mod io;

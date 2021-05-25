@@ -2,13 +2,14 @@
 //!
 //! Triggered when there is only a single constraint in a variable and it does not appear in the
 //! objective function.
+use relp_num::{OrderedField, OrderedFieldRef};
+use relp_num::NonZeroSign;
+
 use crate::data::linear_algebra::traits::SparseElement;
 use crate::data::linear_program::elements::{BoundDirection, LinearProgramType};
 use crate::data::linear_program::elements::RangedConstraintRelation;
 use crate::data::linear_program::general_form::presolve::Index;
 use crate::data::linear_program::general_form::RemovedVariable;
-use crate::data::number_types::nonzero::NonzeroSign;
-use crate::data::number_types::traits::{OrderedField, OrderedFieldRef};
 
 impl<'a, OF> Index<'a, OF>
 where
@@ -67,7 +68,7 @@ where
         variable: usize,
     ) -> Result<(), LinearProgramType<OF>> {
         use RangedConstraintRelation::{Less, Equal, Greater, Range};
-        use NonzeroSign::{Positive, Negative};
+        use NonZeroSign::{Positive, Negative};
         debug_assert_eq!(self.counters.variable[variable], 1);
         debug_assert_eq!(self.counters.iter_active_column(variable).count(), 1);
         debug_assert_eq!(self.general_form.variables[variable].cost, OF::zero());
@@ -181,9 +182,9 @@ where
         &mut self,
         constraint: usize,
         bounds: (bool, bool),
-        coefficient_sign: NonzeroSign,
+        coefficient_sign: NonZeroSign,
     ) {
-        use NonzeroSign::{Positive, Negative};
+        use NonZeroSign::{Positive, Negative};
         if matches!((bounds, coefficient_sign), ((true, _), Positive) | ((_, true), Negative)) {
             self.counters.activity[constraint].0 -= 1;
             if self.counters.activity[constraint].0 <= 1 {

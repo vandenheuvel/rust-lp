@@ -4,6 +4,9 @@
 use std::fmt::{Display, Formatter};
 use std::fmt;
 
+use relp_num::{Field, FieldRef};
+use relp_num::NonZero;
+
 use crate::algorithm::two_phase::matrix_provider::column::{Column as ColumnTrait, OrderedColumn};
 use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumn;
 use crate::algorithm::two_phase::matrix_provider::filter::generic_wrapper::IntoFilteredColumn;
@@ -16,8 +19,6 @@ use crate::data::linear_algebra::traits::{Element, SparseComparator, SparseEleme
 use crate::data::linear_algebra::vector::{DenseVector, SparseVector, Vector};
 use crate::data::linear_program::elements::BoundDirection;
 use crate::data::linear_program::general_form::Variable;
-use crate::data::number_types::nonzero::Nonzero;
-use crate::data::number_types::traits::{Field, FieldRef};
 
 /// The `MatrixData` struct represents variables in 6 different categories.
 ///
@@ -124,7 +125,7 @@ enum ColumnType {
 
 impl<'a, F: 'static> MatrixData<'a, F>
 where
-    F: SparseElement<F> + Field + Nonzero,
+    F: SparseElement<F> + Field + NonZero,
     for <'r> &'r F: FieldRef<F>,
 {
     /// Create a new `MatrixData` instance.
@@ -299,7 +300,7 @@ where
 
 impl<'data, F: 'static> MatrixProvider for MatrixData<'data, F>
 where
-    F: Field + SparseElement<F> + Nonzero,
+    F: Field + SparseElement<F> + NonZero,
     for<'r> &'r F: FieldRef<F>,
 {
     type Column = Column<F>;
@@ -427,7 +428,7 @@ where
 
 impl<'a, F: 'static> PartialInitialBasis for MatrixData<'a, F>
 where
-    F: SparseElement<F> + Field + Nonzero,
+    F: SparseElement<F> + Field + NonZero,
     for <'r> &'r F: FieldRef<F>,
 {
     fn pivot_element_indices(&self) -> Vec<(usize, usize)> {
@@ -617,7 +618,7 @@ where
 
 impl<'a, F: 'static> Display for MatrixData<'a, F>
 where
-    F: Field + SparseElement<F> + Nonzero + 'a,
+    F: Field + SparseElement<F> + NonZero + 'a,
     for<'r> &'r F: FieldRef<F>,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -667,15 +668,14 @@ where
 
 #[cfg(test)]
 mod test {
-    use num::traits::FromPrimitive;
+    use relp_num::R64;
+    use relp_num::Rational64;
 
     use crate::algorithm::two_phase::matrix_provider::matrix_data::Column;
     use crate::algorithm::two_phase::matrix_provider::MatrixProvider;
     use crate::data::linear_algebra::vector::DenseVector;
     use crate::data::linear_algebra::vector::test::TestVector;
     use crate::data::linear_program::elements::BoundDirection;
-    use crate::data::number_types::rational::Rational64;
-    use crate::R64;
     use crate::tests::problem_1;
 
     #[test]
