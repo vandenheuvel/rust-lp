@@ -10,8 +10,8 @@ use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
 use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::LUDecomposition;
 use relp::data::linear_program::elements::LinearProgramType;
 use relp::data::linear_program::general_form::GeneralForm;
-use relp::data::number_types::rational::RationalBig;
 use relp::io::import;
+use relp_num::RationalBig;
 
 /// A linear program solver written in rust.
 #[derive(Clap)]
@@ -19,10 +19,10 @@ use relp::io::import;
 struct Opts {
     /// File containing the problem description
     problem_file: String,
-    #[clap(short, long, default_value=true)]
-    presolve: Option<bool>,
-    #[clap(short, long, default_value=true)]
-    scale: Option<bool>,
+    #[clap(long)]
+    no_presolve: bool,
+    #[clap(long)]
+    no_scale: bool,
 }
 
 fn main() {
@@ -38,7 +38,7 @@ fn main() {
         .expect("Problem is inconsistent");
 
     println!("Presolving...");
-    let data = match general.derive_matrix_data() {
+    let data = match general.derive_matrix_data(!opts.no_presolve, !opts.no_scale) {
         Ok(presolved_data) => presolved_data,
         Err(program_type) => {
             match program_type {

@@ -1,5 +1,5 @@
-use relp::RationalBig;
-use relp::Abs;
+use relp_num::RationalBig;
+use relp_num::Abs;
 use relp_num::RB;
 
 use crate::netlib::solve;

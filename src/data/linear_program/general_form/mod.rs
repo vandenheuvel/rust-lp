@@ -1149,7 +1149,7 @@ mod test {
     fn shift_variables() {
         type T = Rational32;
 
-        let bound_value = 2.5_f64;
+        let bound_value = R32!(5, 2);
 
         let data = vec![
             vec![1, 0],
@@ -1174,7 +1174,7 @@ mod test {
         }, Variable {
             variable_type: VariableType::Continuous,
             cost: R32!(3),
-            lower_bound: Some(R32!(bound_value)),
+            lower_bound: Some(bound_value),
             upper_bound: None,
             shift: R32!(0),
             flipped: false
@@ -1193,7 +1193,7 @@ mod test {
 
         let expected = GeneralForm {
             objective: Objective::Minimize,
-            fixed_cost: R32!(1) + R32!(3) * R32!(bound_value),
+            fixed_cost: R32!(1) + R32!(3) * bound_value,
             constraints: ColumnMajor::from_test_data(&[
                 vec![1, 0, -1],
                 vec![2, 1, -2],
@@ -1203,8 +1203,8 @@ mod test {
                 RangedConstraintRelation::Less,
             ],
             b: DenseVector::from_test_data(vec![
-                2f64 - bound_value * 0f64,
-                8f64 - bound_value * 1f64,
+                (2, 1),
+                (11, 2), // 8 - 5/2
             ]),
             variables: vec![
                 Variable {
@@ -1220,7 +1220,7 @@ mod test {
                     cost: R32!(3),
                     lower_bound: Some(R32!(0)),
                     upper_bound: None,
-                    shift: -R32!(bound_value),
+                    shift: -bound_value,
                     flipped: false,
                 },
                 Variable {

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use relp_num::R32;
-use relp_num::Rational32;
 
 use crate::data::linear_algebra::matrix::{ColumnMajor, Order};
 use crate::data::linear_algebra::vector::{DenseVector, Vector};

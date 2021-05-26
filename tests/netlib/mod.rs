@@ -12,9 +12,9 @@ use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::basis_inver
 use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
 use relp::data::linear_program::general_form::GeneralForm;
 use relp::data::linear_program::solution::Solution;
-use relp::data::number_types::rational::RationalBig;
 use relp::io::error::Import;
 use relp::io::mps::parse_fixed;
+use relp_num::RationalBig;
 
 /// # Generation and execution
 #[allow(missing_docs)]
@@ -54,7 +54,7 @@ fn solve(file_name: &str) -> Solution<S> {
     let mps = parse_fixed(&program).unwrap();
 
     let mut general: GeneralForm<T> = mps.try_into().unwrap();
-    let data = general.derive_matrix_data().unwrap();
+    let data = general.derive_matrix_data(true, true).unwrap();
     let result = data.solve_relaxation::<Carry<S, BasisInverseRows<_>>>();
 
     match result {

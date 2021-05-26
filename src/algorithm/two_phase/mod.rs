@@ -168,8 +168,8 @@ mod test {
             vec![1, 1],
         ], 2);
         let b = DenseVector::from_test_data(vec![
-            3f64 / 2f64,
-            5f64 / 2f64,
+            (3, 2),
+            (5, 2),
         ]);
         let variables = vec![
             Variable {

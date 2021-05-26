@@ -301,7 +301,6 @@ fn count_non_zeros<T>(rows: &[Vec<(usize, T)>]) -> (Vec<usize>, Vec<usize>) {
 #[cfg(test)]
 mod test {
     use relp_num::One;
-    use relp_num::RationalBig;
     use relp_num::RB;
 
     use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumnStruct;
@@ -426,9 +425,7 @@ mod test {
     }
 
     mod subtract_multiple_of_column_from_other_column {
-        use num_traits::FromPrimitive;
         use relp_num::R32;
-        use relp_num::Rational32;
 
         use crate::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::decomposition::subtract_multiple_of_row_from_other_row;
 

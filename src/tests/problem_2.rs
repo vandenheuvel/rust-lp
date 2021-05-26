@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 
-use num_traits::FromPrimitive;
 use relp_num::{Rational64, RationalBig};
 use relp_num::Field;
 use relp_num::NonZero;
@@ -67,7 +66,7 @@ fn conversion_pipeline() {
     ], 5)));
 }
 
-pub fn create_matrix_data_data<T: Field + FromPrimitive + NonZero>(
+pub fn create_matrix_data_data<'a, T: Field + From<u8> + From<&'a u8> + NonZero>(
 ) -> (Sparse<T, T, ColumnMajor>, DenseVector<T>, Vec<Variable<T>>) {
     let constraints = ColumnMajor::from_test_data(
         &vec![
@@ -86,10 +85,10 @@ pub fn create_matrix_data_data<T: Field + FromPrimitive + NonZero>(
 
     let variables = vec![
         Variable {
-            cost: T::from_i32(1).unwrap(),
-            lower_bound: Some(T::from_i32(0)).unwrap(),
+            cost: T::from(1),
+            lower_bound: Some(T::from(0)),
             upper_bound: None,
-            shift: T::from_i32(0).unwrap(),
+            shift: T::from(0),
             variable_type: VariableType::Continuous,
             flipped: false,
         }; 5
@@ -142,18 +141,18 @@ pub fn tableau_form<'a>(
     data: &'a MatrixData<'a, T>,
 ) -> Tableau<Carry<S, BasisInverseRows<S>>, NonArtificial<MatrixData<'a, T>>> {
     let carry = {
-        let minus_objective = RB!(-9f64 / 2f64);
-        let minus_pi = DenseVector::from_test_data(vec![2.5f64, -1f64, -1f64]);
+        let minus_objective = RationalBig::from((-9, 2));
+        let minus_pi = DenseVector::from_test_data(vec![(5, 2), (-1, 1), (-1, 1)]);
         let b = DenseVector::from_test_data(vec![
-            0.5f64,
-            2.5f64,
-            1.5f64,
+            (1, 2),
+            (5, 2),
+            (3, 2),
         ]);
         let basis_indices = vec![1, 3, 4];
         let basis_inverse_rows = BasisInverseRows::new(vec![
-            SparseVector::from_test_data(vec![0.5f64, 0f64, 0f64]),
-            SparseVector::from_test_data(vec![-0.5f64, 1f64, 0f64]),
-            SparseVector::from_test_data(vec![-2.5f64, 0f64, 1f64]),
+            SparseVector::from_test_data(vec![(1, 2), (0, 1), (0, 1)]),
+            SparseVector::from_test_data(vec![(-1, 2), (1, 1), (0, 1)]),
+            SparseVector::from_test_data(vec![(-5, 2), (0, 1), (1, 1)]),
         ]);
 
         Carry::new(minus_objective, minus_pi, b, basis_indices, basis_inverse_rows)

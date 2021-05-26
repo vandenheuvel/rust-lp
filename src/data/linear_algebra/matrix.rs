@@ -8,7 +8,6 @@ use std::collections::HashSet;
 use std::iter::Iterator;
 use std::marker::PhantomData;
 
-use num_traits::{FromPrimitive, ToPrimitive};
 use relp_num::Field;
 use relp_num::NonZero;
 
@@ -50,7 +49,7 @@ pub trait Order: Sized {
     ///
     /// Note that the numerics might not be exact due to intermediate casting to floats, for
     /// convenience in other places of the code base.
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NonZero>(
+    fn from_test_data<F: From<IT>, C, IT: NonZero + Clone>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>
@@ -89,7 +88,7 @@ impl Order for RowMajor {
         Sparse::from_major_ordered_tuples(rows, nr_rows, nr_columns)
     }
 
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NonZero>(
+    fn from_test_data<F: From<IT>, C, IT: NonZero + Clone>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>
@@ -105,7 +104,7 @@ impl Order for RowMajor {
         for (row_index, row) in rows.iter().enumerate() {
             for (column_index, value) in row.iter().enumerate() {
                 if value.is_not_zero() {
-                    let new_value = F::from_f64(value.to_f64().unwrap()).unwrap();
+                    let new_value = F::from(value.clone());
                     data[row_index].push((column_index, new_value));
                 }
             }
@@ -135,7 +134,7 @@ impl Order for ColumnMajor {
         Sparse::from_major_ordered_tuples(columns, nr_columns, nr_rows)
     }
 
-    fn from_test_data<F: FromPrimitive, C, IT: ToPrimitive + NonZero>(
+    fn from_test_data<F: From<IT>, C, IT: NonZero + Clone>(
         rows: &[Vec<IT>],
         nr_columns: usize,
     ) -> Sparse<F, C, Self>
@@ -151,7 +150,7 @@ impl Order for ColumnMajor {
         for (row_index, row) in rows.iter().enumerate() {
             for (column_index, value) in row.iter().enumerate() {
                 if value.is_not_zero() {
-                    let new_value = F::from_f64(value.to_f64().unwrap()).unwrap();
+                    let new_value = F::from(value.clone());
                     data[column_index].push((row_index, new_value));
                 }
             }
@@ -570,9 +569,9 @@ pub mod test {
 
     type T = Rational32;
 
-    fn get_test_matrix<F, C>() -> Sparse<F, C, ColumnMajor>
+    fn get_test_matrix<F: From<u8>, C>() -> Sparse<F, C, ColumnMajor>
     where
-        F: Field + FromPrimitive + SparseElement<C>,
+        F: Field + SparseElement<C>,
         C: SparseComparator,
     {
         ColumnMajor::from_test_data(&vec![

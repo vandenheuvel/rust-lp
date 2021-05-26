@@ -11,10 +11,10 @@ use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper
 use relp::data::linear_algebra::traits::Element;
 use relp::data::linear_program::general_form::GeneralForm;
 use relp::data::linear_program::solution::Solution;
-use relp::data::number_types::rational::{Rational64, RationalBig};
-use relp::data::number_types::traits::OrderedField;
 use relp::io::import;
-use relp::RB;
+use relp_num::{Rational64, RationalBig};
+use relp_num::OrderedField;
+use relp_num::RB;
 
 use super::get_test_file_path;
 
@@ -40,7 +40,7 @@ fn adlittle() {
     let result = import::<T>(&path).unwrap();
 
     let mut general = result.try_into().unwrap();
-    let data = general.derive_matrix_data().unwrap();
+    let data = general.derive_matrix_data(true, true).unwrap();
     let result = data.solve_relaxation::<Carry<S, BasisInverseRows<_>>>();
 
     match result {
@@ -59,7 +59,7 @@ fn afiro() {
     type S = RationalBig;
 
     let mut general = to_general_form::<T>("afiro");
-    let data = general.derive_matrix_data().unwrap();
+    let data = general.derive_matrix_data(true, true).unwrap();
     let result = data.solve_relaxation::<Carry<_, LUDecomposition<S>>>();
 
     match result {
@@ -125,7 +125,7 @@ fn maros() {
     type S = RationalBig;
 
     let mut general = to_general_form::<T>("maros");
-    let data = general.derive_matrix_data().unwrap();
+    let data = general.derive_matrix_data(true, true).unwrap();
     let result = data.solve_relaxation::<Carry<S, LUDecomposition<_>>>();
 
     match result {
@@ -152,7 +152,7 @@ fn nazareth() {
     type S = RationalBig;
 
     let mut general = to_general_form::<T>("nazareth");
-    let data = general.derive_matrix_data().unwrap();
+    let data = general.derive_matrix_data(true, true).unwrap();
     let result = data.solve_relaxation::<Carry<S, LUDecomposition<_>>>();
     assert_eq!(result, OptimizationResult::Unbounded);  // GLPK
 }
@@ -163,7 +163,7 @@ fn testprob() {
     type S = RationalBig;
 
     let mut general = to_general_form::<T>("testprob");
-    let data = general.derive_matrix_data().unwrap();
+    let data = general.derive_matrix_data(true, true).unwrap();
     let result = data.solve_relaxation::<Carry<S, LUDecomposition<_>>>();
 
     match result {

@@ -1,7 +1,5 @@
 use std::convert::TryInto;
 
-use num::FromPrimitive;
-
 use relp::algorithm::{OptimizationResult, SolveRelaxation};
 use relp::algorithm::two_phase::matrix_provider::MatrixProvider;
 use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
@@ -22,7 +20,7 @@ fn small_example() {
 
     let mut general: GeneralForm<Rational64> = result.try_into().ok().unwrap();
 
-    let data = general.derive_matrix_data().ok().unwrap();
+    let data = general.derive_matrix_data(true, true).ok().unwrap();
     let result = data.solve_relaxation::<Carry<RationalBig, LUDecomposition<_>>>();
 
     match result {

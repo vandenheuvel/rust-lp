@@ -70,9 +70,7 @@ pub trait Vector<F>: PartialEq + Display + Debug {
 pub mod test {
     //! Contains also some helper methods to be used in other test modules.
 
-    use std::f64::EPSILON;
-
-    use num_traits::{FromPrimitive, NumCast, ToPrimitive, Zero};
+    use num_traits::{NumCast, FromPrimitive};
     use relp_num::{Field, FieldRef};
     use relp_num::F;
     use relp_num::NonZero;
@@ -81,15 +79,13 @@ pub mod test {
     use crate::data::linear_algebra::vector::{DenseVector, SparseVector, Vector};
 
     pub trait TestVector<F>: Vector<F> {
-        fn from_test_data<T: ToPrimitive + Zero>(data: Vec<T>) -> Self;
+        fn from_test_data<T: NonZero>(data: Vec<T>) -> Self where F: From<T>;
     }
-    impl<F: Field + FromPrimitive> TestVector<F> for DenseVector<F> {
+    impl<F: Field> TestVector<F> for DenseVector<F> {
         /// Create a `DenseVector` from the provided data.
-        fn from_test_data<T: ToPrimitive + Zero>(data: Vec<T>) -> Self {
+        fn from_test_data<T>(data: Vec<T>) -> Self where F: From<T> {
             Self {
-                data: data.into_iter()
-                    .map(|v| F::from_f64(v.to_f64().unwrap()).unwrap())
-                    .collect(),
+                data: data.into_iter().map(|v| F::from(v)).collect(),
             }
         }
     }
@@ -98,7 +94,7 @@ pub mod test {
         F: Field + FromPrimitive,
     {
         /// Create a `SparseVector` from the provided data.
-        fn from_test_data<T: ToPrimitive + Zero>(data: Vec<T>) -> Self {
+        fn from_test_data<T: NonZero>(data: Vec<T>) -> Self where F: From<T> {
             debug_assert_ne!(data.len(), 0);
 
             let size = data.len();
@@ -106,8 +102,8 @@ pub mod test {
             Self::new(
                 data.into_iter()
                     .enumerate()
-                    .filter(|(_, v)| !v.is_zero())
-                    .map(|(i, v)| (i, F::from_f64(v.to_f64().unwrap()).unwrap()))
+                    .filter(|(_, v)| v.is_not_zero())
+                    .map(|(i, v)| (i, F::from(v)))
                     .collect(),
                 size,
             )
@@ -124,7 +120,7 @@ pub mod test {
             debug_assert!(data.is_sorted_by_key(|&(i, _)| i));
             debug_assert_ne!(len, 0);
             debug_assert!(data.len() <= len);
-            debug_assert!(data.iter().all(|&(_, v)| v.to_f64().unwrap().abs() > EPSILON));
+            debug_assert!(data.iter().all(|&(_, v)| v.to_f64().unwrap().abs() > f64::EPSILON));
 
             Self::new(
                 data.into_iter().map(|(i, v)| {
@@ -136,12 +132,12 @@ pub mod test {
     }
 
     /// A test vector used in tests.
-    fn get_test_vector<F: Field + FromPrimitive, V: TestVector<F>>() -> V {
+    fn get_test_vector<F: Field + From<u8> + NonZero, V: TestVector<F>>() -> V {
         V::from_test_data(vec![0, 5, 6])
     }
 
     /// Test
-    fn push_value<F: Field + FromPrimitive + NonZero, V: TestVector<F>>() where for<'r> &'r F: FieldRef<F> {
+    fn push_value<F: Field + FromPrimitive + From<u8> + NonZero, V: TestVector<F>>() where for<'r> &'r F: FieldRef<F> {
         let mut v = get_test_vector::<F, V>();
         let len = v.len();
         let new_v = F!(1);
@@ -152,7 +148,7 @@ pub mod test {
     }
 
     /// Test
-    fn get_set<F: Field + FromPrimitive + NonZero, V: TestVector<F>>() {
+    fn get_set<F: Field + FromPrimitive + From<u8> + NonZero, V: TestVector<F>>() {
         let mut v = get_test_vector::<F, V>();
 
         // Getting a nonzero value
@@ -175,21 +171,21 @@ pub mod test {
     }
 
     /// Test
-    fn out_of_bounds_get<F: Field + FromPrimitive, V: TestVector<F>>() {
+    fn out_of_bounds_get<F: Field + NonZero + From<u8> + FromPrimitive, V: TestVector<F>>() {
         let v = get_test_vector::<F, V>();
 
         &v.get(400);
     }
 
     /// Test
-    fn out_of_bounds_set<F: Field + FromPrimitive + NonZero, V: TestVector<F>>() {
+    fn out_of_bounds_set<F: Field + From<u8> + FromPrimitive + NonZero, V: TestVector<F>>() {
         let mut v = get_test_vector::<F, V>();
 
         v.set(400, F!(45));
     }
 
     /// Test
-    fn len<F: Field + FromPrimitive, V: TestVector<F>>() {
+    fn len<F: Field + From<u8> + NonZero, V: TestVector<F>>() {
         let v = get_test_vector::<F, V>();
 
         assert_eq!(v.len(), 3);
