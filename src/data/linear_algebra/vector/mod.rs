@@ -70,7 +70,7 @@ pub trait Vector<F>: PartialEq + Display + Debug {
 pub mod test {
     //! Contains also some helper methods to be used in other test modules.
 
-    use num_traits::{NumCast, FromPrimitive};
+    use num_traits::{FromPrimitive, NumCast};
     use relp_num::{Field, FieldRef};
     use relp_num::F;
     use relp_num::NonZero;

@@ -3,6 +3,7 @@ use std::path::Path;
 use std::process::exit;
 
 use clap::Clap;
+use relp_num::RationalBig;
 
 use relp::algorithm::{OptimizationResult, SolveRelaxation};
 use relp::algorithm::two_phase::matrix_provider::MatrixProvider;
@@ -11,7 +12,6 @@ use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper
 use relp::data::linear_program::elements::LinearProgramType;
 use relp::data::linear_program::general_form::GeneralForm;
 use relp::io::import;
-use relp_num::RationalBig;
 
 /// A linear program solver written in rust.
 #[derive(Clap)]

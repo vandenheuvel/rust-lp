@@ -3,8 +3,8 @@
 //! Reading numbers from strings.
 use std::convert::TryFrom;
 
-use relp_num::Sign;
 use relp_num::Rational64;
+use relp_num::Sign;
 
 use crate::io::error::Parse as ParseError;
 use crate::io::error::ParseResult;
