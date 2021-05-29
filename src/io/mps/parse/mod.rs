@@ -144,7 +144,7 @@ trait ColumnRetriever<'a> {
     /// Try to read two more columns.
     ///
     /// TODO(CORRECTNESS): Let this fail when there is e.g. only one value?
-    fn five_and_six(line_after_first_four: Self::RestOfLine) -> Option<[&'a str; 2]>;
+    fn five_and_six(line_after_first_four: Self::RestOfLine) -> ParseResult<Option<[&'a str; 2]>>;
 
     fn one_through_three(line: &'a str) -> ParseResult<([&str; 3], Self::RestOfLine)>;
 
@@ -370,7 +370,7 @@ fn parse_column_section<'a, F: Parse, CR: ColumnRetriever<'a>, L: Iterator<Item 
 
             let content = CR::is_column_marker_line(line)
                 .map_err(|e| e.wrap(format!(
-                    "Could not determine whether this line {} is a marker line: \"{}\"", number, line,
+                    "Could not determine whether line {} is a marker line: \"{}\"", number, line,
                 )))?;
             match content {
                 ColumnLineContent::Marker([marker_text]) => {
@@ -389,7 +389,8 @@ fn parse_column_section<'a, F: Parse, CR: ColumnRetriever<'a>, L: Iterator<Item 
                         START_OF_INTEGER => VariableType::Integer,
                         END_OF_INTEGER => VariableType::Continuous,
                         _ => return Err(ParseError::with_location(
-                            format!("Marker type \"{}\" unknown.", marker_text), (number, line)).into()),
+                            format!("Marker type \"{}\" unknown.", marker_text), (number, line),
+                        ).into()),
                     };
                     debug_assert_ne!(previous_variable_type, active_variable_type);
                 },
@@ -426,8 +427,12 @@ fn parse_column_section<'a, F: Parse, CR: ColumnRetriever<'a>, L: Iterator<Item 
 
                     let _result: Result<_, ImportError> = save_pair(row_name, value_text);
                     _result?;
-                    if let Some([row_name, value_text]) = CR::five_and_six(rest_of_line) {
-                        save_pair(row_name, value_text)?;
+                    match CR::five_and_six(rest_of_line) {
+                        Ok(Some([row_name, value_text])) => save_pair(row_name, value_text)?,
+                        Ok(None) => {},
+                        Err(e) => return Err(e.wrap(format!(
+                            "Line {} contained an unexpected number of elements: \"{}\"", number, line,
+                        )).into()),
                     }
                 },
             }
@@ -609,12 +614,11 @@ fn parse_value_section_line<'a, F: Parse, T: ListedInGroup<ValueType = F>, CR: C
     };
 
     save_pair(row_name, value_text)?;
-    if let Some([row_name, value_text]) = CR::five_and_six(rest_of_line) {
-        let _result: Result<_, ImportError> = save_pair(row_name, value_text);
-        _result?;
+    match CR::five_and_six(rest_of_line) {
+        Ok(Some([row_name, value_text])) => save_pair(row_name, value_text),
+        Ok(None) => Ok(()),
+        Err(e) => Err(e.wrap("Line contained an unexpected number of elements").into()),
     }
-
-    Ok(())
 }
 
 fn save_to_group_collector<T: ListedInGroup, const CAN_HAVE_DUPLICATES: bool>(

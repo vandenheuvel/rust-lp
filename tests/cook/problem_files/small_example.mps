@@ -7,7 +7,8 @@ ROWS
   L  r1
   G  r2
 COLUMNS
-  x    obj    1   r1  1  r2  2
+  x    obj    1   r1  1
+  x    r2  2
   y    obj -2.3   r1 -1
   z    obj  0.5
   z    r2    -1

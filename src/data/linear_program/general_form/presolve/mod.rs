@@ -155,7 +155,7 @@ where
             }
         }
 
-        // TODO(ENHANCEMENT): Duplicate rows and columns.
+        // TODO(ENHANCEMENT): Deduplicate rows and columns.
 
         // No rule was applied
         Ok(Change::NotMeaningful)

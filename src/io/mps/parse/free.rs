@@ -60,15 +60,23 @@ impl<'a> ColumnRetriever<'a> for Free {
         Ok(([two, three, four], parts))
     }
 
-    fn five_and_six(line_after_first_four: Self::RestOfLine) -> Option<[&'a str; 2]> {
+    fn five_and_six(line_after_first_four: Self::RestOfLine) -> ParseResult<Option<[&'a str; 2]>> {
         let mut parts = line_after_first_four;
 
-        let three = parts.next();
-        let four = parts.next();
+        let five = parts.next();
+        let six = parts.next();
 
-        if let (Some(three), Some(four)) = (three, four) {
-            Some([three, four])
-        } else { None }
+        if parts.next().is_some() {
+            Err(ParseError::new("Line has more than 6 elements"))
+        } else {
+            match (five, six) {
+                (Some(five), Some(six)) => Ok(Some([five, six])),
+                (None, None) => Ok(None),
+                (Some(_), None) | (None, Some(_)) => Err(
+                    ParseError::new("Line has a fifth element, but no sixth")
+                )
+            }
+        }
     }
 
     fn one_through_three(line: &'a str) -> ParseResult<([&str; 3], Self::RestOfLine)> {

@@ -12,13 +12,14 @@ use relp::data::linear_algebra::traits::Element;
 use relp::data::linear_program::general_form::GeneralForm;
 use relp::data::linear_program::solution::Solution;
 use relp::io::import;
-use relp_num::{Rational64, RationalBig};
+use relp_num::{Rational64, RationalBig, NonZero};
 use relp_num::OrderedField;
 use relp_num::RB;
 
 use super::get_test_file_path;
+use std::str::FromStr;
 
-fn to_general_form<T: From<Rational64> + Zero + One + Ord + Element + Neg<Output=T>>(
+fn to_general_form<T: From<Rational64> + Zero + NonZero + One + Ord + Element + Neg<Output=T>>(
     file_name: &str,
 ) -> GeneralForm<T>
 where
@@ -47,7 +48,7 @@ fn adlittle() {
         OptimizationResult::FiniteOptimum(vector) => {
             let reconstructed = data.reconstruct_solution(vector);
             let solution = general.compute_full_solution_with_reduced_solution(reconstructed);
-            assert_eq!(solution.objective_value, S::from("24975305659811992079614961229/120651674036153428931840"));
+            assert_eq!(solution.objective_value, S::from_str("24975305659811992079614961229/120651674036153428931840").unwrap());
         },
         _ => assert!(false),
     }

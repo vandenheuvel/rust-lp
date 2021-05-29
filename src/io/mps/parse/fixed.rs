@@ -73,9 +73,9 @@ impl<'a> ColumnRetriever<'a> for Fixed {
         }
     }
 
-    fn five_and_six(line_after_first_four: Self::RestOfLine) -> Option<[&'a str; 2]> {
+    fn five_and_six(line_after_first_four: Self::RestOfLine) -> ParseResult<Option<[&'a str; 2]>> {
         let relative_field_six_end = FIELDS[6].end - FIELDS[4].end;
-        if line_after_first_four.len() >= relative_field_six_end {
+        let result = if line_after_first_four.len() >= relative_field_six_end {
             let (five_start, five_end) = (FIELDS[5].start - FIELDS[4].end, FIELDS[5].end - FIELDS[4].end);
             let (six_start, six_end) = (FIELDS[6].start - FIELDS[4].end, FIELDS[6].end - FIELDS[4].end);
 
@@ -87,7 +87,9 @@ impl<'a> ColumnRetriever<'a> for Fixed {
                     six,
                 ])
             } else { None }
-        } else { None }
+        } else { None };
+
+        Ok(result)
     }
 
     fn one_through_three(line: &'a str) -> ParseResult<([&str; 3], Self::RestOfLine)> {

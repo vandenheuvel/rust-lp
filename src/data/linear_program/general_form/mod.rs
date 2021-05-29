@@ -23,7 +23,6 @@ use crate::data::linear_algebra::traits::{SparseComparator, SparseElement as Lin
 use crate::data::linear_algebra::vector::{DenseVector, SparseVector, Vector};
 use crate::data::linear_program::elements::{BoundDirection, LinearProgramType, Objective, RangedConstraintRelation, RangedConstraintRelationKind, VariableType};
 use crate::data::linear_program::general_form::presolve::{Change, Index as PresolveIndex};
-use crate::data::linear_program::general_form::presolve::scale::Scalable;
 use crate::data::linear_program::general_form::presolve::updates::Changes;
 use crate::data::linear_program::general_form::RemovedVariable::{FunctionOfOthers, Solved};
 use crate::data::linear_program::solution::Solution;
@@ -313,9 +312,10 @@ where
         self.transform_variables();
         self.make_b_non_negative();
         self.make_minimization_problem();
-        if scale {
-            self.scale();
-        }
+        // TODO
+        // if scale {
+        //     self.scale();
+        // }
 
         Ok(())
     }

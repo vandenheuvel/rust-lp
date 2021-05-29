@@ -27,7 +27,8 @@ fn small_example() {
         OptimizationResult::FiniteOptimum(solution) => {
             let reconstructed = data.reconstruct_solution(solution);
             let solution = general.compute_full_solution_with_reduced_solution(reconstructed);
-            assert!((solution.objective_value - RB!(-243, 4)).abs() < RB!(1e-5));
+            println!("{}", solution.objective_value);
+            assert!((solution.objective_value - RB!(-143, 2)).abs() < RB!(1e-5)); // glpk
         }
         _ => assert!(false),
     }
