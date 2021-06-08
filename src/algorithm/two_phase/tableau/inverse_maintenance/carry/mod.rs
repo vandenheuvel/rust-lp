@@ -4,7 +4,7 @@
 //! the ability to use a different basis inverse representation.
 use std::cmp::Ordering;
 use std::collections::HashSet;
-use std::fmt::{Display, Formatter};
+use std::fmt::{Display, Formatter, Debug};
 use std::fmt;
 use std::ops::Neg;
 
@@ -573,6 +573,7 @@ where
     fn cost_difference<G, C: Column<F=G> + OrderedColumn>(&self, original_column: &C) -> Self::F
     where
         Self::F: ops::Column<G>,
+        G: Display + Debug,
     {
         self.minus_pi.sparse_inner_product::<Self::F, _, _>(original_column.iter())
     }

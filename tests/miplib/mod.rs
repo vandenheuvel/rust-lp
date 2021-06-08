@@ -53,7 +53,7 @@ fn test(file_name: &str, objective: f64, tolerance: f64) {
     let result = import::<T>(&path).unwrap();
 
     let mut general = result.try_into().ok().unwrap();
-    let data = general.derive_matrix_data(true, true).ok().unwrap();
+    let data = general.derive_matrix_data(true, false).ok().unwrap();
     let result = data.solve_relaxation::<Carry<S, BasisInverseRows<_>>>();
 
     match result {

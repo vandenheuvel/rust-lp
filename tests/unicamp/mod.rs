@@ -57,7 +57,7 @@ where
     let mps = import::<GFT>(&path).unwrap();
 
     let mut general = mps.try_into().unwrap();
-    let data = match general.derive_matrix_data(true, true) {
+    let data = match general.derive_matrix_data(true, false) {
         Ok(data) => data,
         Err(LinearProgramType::FiniteOptimum(Solution {
                                                  objective_value, solution_values,

@@ -37,7 +37,8 @@ pub trait Vector<F>: PartialEq + Display + Debug {
     /// Compute the inner product with a column vector from a matrix.
     fn sparse_inner_product<'a, H, G: 'a, V: Iterator<Item=&'a SparseTuple<G>>>(&self, column: V) -> H
     where
-        H: Zero + AddAssign<F>,
+        H: Zero + AddAssign<F> + Display + Debug,
+        G: Display + Debug,
         for<'r> &'r F: Mul<&'r G, Output=F>,
     ;
     /// Make a vector longer by one, by adding an extra value at the end of this vector.

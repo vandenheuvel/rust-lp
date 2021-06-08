@@ -20,14 +20,13 @@ fn small_example() {
 
     let mut general: GeneralForm<Rational64> = result.try_into().ok().unwrap();
 
-    let data = general.derive_matrix_data(true, true).ok().unwrap();
+    let data = general.derive_matrix_data(true, false).ok().unwrap();
     let result = data.solve_relaxation::<Carry<RationalBig, LUDecomposition<_>>>();
 
     match result {
         OptimizationResult::FiniteOptimum(solution) => {
             let reconstructed = data.reconstruct_solution(solution);
             let solution = general.compute_full_solution_with_reduced_solution(reconstructed);
-            println!("{}", solution.objective_value);
             assert!((solution.objective_value - RB!(-143, 2)).abs() < RB!(1e-5)); // glpk
         }
         _ => assert!(false),

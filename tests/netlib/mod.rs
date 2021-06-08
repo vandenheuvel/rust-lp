@@ -54,7 +54,7 @@ fn solve(file_name: &str) -> Solution<S> {
     let mps = parse_fixed(&program).unwrap();
 
     let mut general: GeneralForm<T> = mps.try_into().unwrap();
-    let data = general.derive_matrix_data(true, true).unwrap();
+    let data = general.derive_matrix_data(true, false).unwrap();
     let result = data.solve_relaxation::<Carry<S, BasisInverseRows<_>>>();
 
     match result {

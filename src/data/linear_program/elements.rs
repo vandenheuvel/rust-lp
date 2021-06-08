@@ -197,3 +197,20 @@ impl Default for Objective {
         Objective::Minimize
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::data::linear_program::elements::BoundDirection;
+    use relp_num::{NonZeroSign, Sign};
+
+    #[test]
+    fn test_mul() {
+        assert_eq!(BoundDirection::Lower * NonZeroSign::Positive, BoundDirection::Lower);
+        assert_eq!(BoundDirection::Upper * NonZeroSign::Positive, BoundDirection::Upper);
+        assert_eq!(!BoundDirection::Lower * NonZeroSign::Positive, BoundDirection::Upper);
+
+        assert_eq!(BoundDirection::Lower * Sign::Positive.into(), BoundDirection::Lower);
+        assert_eq!(BoundDirection::Upper * Sign::Positive.into(), BoundDirection::Upper);
+        assert_eq!(!BoundDirection::Lower * Sign::Positive.into(), BoundDirection::Upper);
+    }
+}

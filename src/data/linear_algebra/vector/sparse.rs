@@ -80,9 +80,10 @@ where
     }
 
     fn sparse_inner_product<'a, H, G: 'a, I: Iterator<Item=&'a SparseTuple<G>>>(&self, column: I) -> H
-        where
-            H: Zero + AddAssign<F>,
-            for<'r> &'r F: Mul<&'r G, Output=F>,
+    where
+        H: Zero + AddAssign<F> + Display + Debug,
+        G: Display + Debug,
+        for<'r> &'r F: Mul<&'r G, Output=F>,
     {
         let mut total = H::zero();
 
@@ -253,24 +254,26 @@ where
     ///
     /// * `i`: Index of the value. New tuple will be inserted, potentially causing many values to
     /// be shifted.
-    /// * `value`: Value to be taken at index `i`. Should not be very close to zero to avoid
-    /// memory usage and numerical error build-up.
+    /// * `value`: Value to be taken at index `i`.
     pub fn shift_value<G>(&mut self, i: usize, value: G)
     where
         F: PartialEq<G> + AddAssign<G> + From<G>,
         for<'r> &'r G: Neg<Output=G>,
+        G: NonZero,
     {
         debug_assert!(i < self.len);
 
-        match self.get_data_index(i) {
-            Ok(index) => {
-                if self.data[index].1 == -&value {
-                    self.set_zero(i);
-                } else {
-                    self.data[index].1 += value;
-                }
-            },
-            Err(index) => self.data.insert(index, (i, From::from(value))),
+        if value.is_not_zero() {
+            match self.get_data_index(i) {
+                Ok(index) => {
+                    if self.data[index].1 == -&value {
+                        self.set_zero(i);
+                    } else {
+                        self.data[index].1 += value;
+                    }
+                },
+                Err(index) => self.data.insert(index, (i, From::from(value))),
+            }
         }
     }
 

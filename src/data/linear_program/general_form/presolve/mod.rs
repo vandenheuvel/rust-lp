@@ -4,7 +4,7 @@
 //! applying the changes proposed. This module contains data structures and logic for presolving.
 use std::iter::Iterator;
 
-use relp_num::{Field, OrderedField, OrderedFieldRef};
+use relp_num::{Field, OrderedField, OrderedFieldRef, NonZeroSigned};
 use relp_num::NonZeroSign;
 
 pub use scale::Scalable as Prescalable;
@@ -182,8 +182,8 @@ where
     ) {
         debug_assert!(self.updates.removed_variables.iter().all(|&(j, _)| variable != j));
         debug_assert!(match direction {
-            BoundDirection::Lower => change.as_ref().map_or(true, |v| v > &OF::zero()),
-            BoundDirection::Upper => change.as_ref().map_or(true, |v| v < &OF::zero()),
+            BoundDirection::Lower => change.as_ref().map_or(true, NonZeroSigned::is_positive),
+            BoundDirection::Upper => change.as_ref().map_or(true, NonZeroSigned::is_negative),
         });
 
         if self.updates.is_variable_fixed(variable).is_some() && self.counters.is_variable_still_active(variable) {

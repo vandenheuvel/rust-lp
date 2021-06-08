@@ -190,6 +190,7 @@ pub trait InverseMaintener: Display + Sized {
     fn cost_difference<G, C: Column<F=G> + OrderedColumn>(&self, original_column: &C) -> Self::F
     where
         Self::F: ops::Column<G>,
+        G: Display + Debug,
     ;
 
     /// Multiplies the submatrix consisting of `minus_pi` and B^-1 by an `original_column`.

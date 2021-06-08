@@ -167,7 +167,7 @@ where
         let constraint_update = self.constraint_update(constraint, &bound, direction)?;
         if let Some(change) = constraint_update {
             let (remove_constraint, apply_variable_part) = match change {
-                ConstraintUpdate::Remove => (true, true),
+                ConstraintUpdate::Remove => (true, true), // TODO(CORRECTNESS): Should the second value be changed to `false`?
                 ConstraintUpdate::Replace(new_inequality, right_hand_side_shift) => {
                     self.updates.constraints.insert(constraint, new_inequality.into());
                     self.updates.change_b(constraint, right_hand_side_shift);
@@ -226,7 +226,7 @@ where
     /// # Arguments
     ///
     /// * `constraint`: Index of the constraint under consideration.
-    /// * `value`: Value of the activity lower- or upperbound.
+    /// * `bound_value`: Value of the activity lower- or upperbound.
     /// * `direction`: Whether it's the activity lower- or upperbound.
     ///
     /// # Return value
@@ -347,7 +347,7 @@ where
             let change = self.updates.update_activity_variable_bound(
                 variable,
                 new_variable_bound_direction,
-                new_variable_bound_value,
+                new_variable_bound_value.clone(),
             );
 
             match change {
