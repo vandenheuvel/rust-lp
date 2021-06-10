@@ -12,6 +12,7 @@ use crate::algorithm::two_phase::matrix_provider::column::Column;
 use crate::algorithm::two_phase::tableau::inverse_maintenance::{ColumnComputationInfo, InverseMaintener, ops as im_ops};
 use crate::algorithm::two_phase::tableau::kind::Kind;
 use crate::data::linear_algebra::vector::{SparseVector, Vector};
+use std::cmp::max;
 
 pub mod inverse_maintenance;
 pub mod kind;
@@ -250,42 +251,44 @@ where
 /// Check whether the tableau currently has a valid basic feasible solution.
 ///
 /// Only used for debug purposes.
-pub fn is_in_basic_feasible_solution_state<IM, K>(tableau: &Tableau<IM, K>) -> bool
+pub fn debug_assert_in_basic_feasible_solution_state<IM, K>(tableau: &Tableau<IM, K>)
 where
     IM: InverseMaintener<F: im_ops::Column<<K::Column as Column>::F> + im_ops::Cost<K::Cost>>,
     K: Kind,
 {
     // Checking basis_columns
     // Correct number of basis columns (uniqueness is implied because it's a set)
-    let nr_basis_columns = tableau.basis_columns.len() == tableau.nr_rows();
-    debug_assert!(nr_basis_columns);
+    debug_assert_eq!(tableau.basis_columns.len(), tableau.nr_rows());
 
     // Checking carry matrix
-    let carry = {
-        // `basis_inverse_rows` are a proper inverse by regenerating basis columns
-        let basis = (0..tableau.nr_rows())
-            .map(|i| (i, tableau.inverse_maintainer.basis_column_index_for_row(i)))
-            .all(|(i, j)| {
-                let e_i = SparseVector::new(vec![(i, IM::F::one())], tableau.nr_rows());
-                tableau.generate_column(j).into_column() == e_i
-            });
-        debug_assert!(basis);
+    // `basis_inverse_rows` are a proper inverse by regenerating basis columns
+    (0..tableau.nr_rows())
+        .map(|i| (i, tableau.inverse_maintainer.basis_column_index_for_row(i)))
+        .for_each(|(i, j)| {
+            let e_i = SparseVector::new(vec![(i, IM::F::one())], tableau.nr_rows());
+            debug_assert_eq!(
+                tableau.generate_column(j).into_column(), e_i,
+                "Column {} is not equal to e_{}", j, i,
+            );
+        });
 
-        // `minus_pi` get to relative zero cost for basis columns
-        let minus_pi = (0..tableau.nr_rows())
-            .map(|i| tableau.inverse_maintainer.basis_column_index_for_row(i))
-            .all(|j| tableau.relative_cost(j) == IM::F::zero());
-        debug_assert!(minus_pi);
+    // `minus_pi` get to relative zero cost for basis columns
+    (0..tableau.nr_rows())
+        .map(|i| tableau.inverse_maintainer.basis_column_index_for_row(i))
+        .for_each(|j| debug_assert_eq!(
+            tableau.relative_cost(j), IM::F::zero(),
+            "Relative cost of column {} is not zero", j,
+        ));
 
-        // `b` >= 0
-        let b_ok = (0..tableau.nr_rows())
-            .all(|i| tableau.inverse_maintainer.b()[i] >= IM::F::zero());
-        debug_assert!(b_ok);
-
-        basis && minus_pi && b_ok
-    };
-
-    nr_basis_columns && carry
+    // `b` >= 0
+    (0..tableau.nr_rows())
+        .for_each(|i| {
+            let value = &tableau.inverse_maintainer.b()[i];
+            debug_assert!(
+                value >= &IM::F::zero(),
+                "rhs (b) is not always nonnegative: at index {} we have {} < 0", i, value,
+            );
+        });
 }
 
 impl<IM, K> Display for Tableau<IM, K>
@@ -294,32 +297,55 @@ where
     K: Kind,
 {
     fn fmt(&self, f: &mut Formatter) -> FormatResult {
-        writeln!(f, "Tableau:")?;
+        assert!(self.nr_rows().to_string().len() <= "cost".len());
 
-        writeln!(f, "=== Current State ===")?;
-        let column_width = 10;
-        let counter_width = 8;
-        // Column counter
-        write!(f, "{0:width$}", "", width = counter_width)?;
-        write!(f, "{0:^width$}", "b", width = column_width)?;
-        write!(f, "|")?;
-        for column_index in 0..self.nr_columns() {
-            write!(f, "{0:^width$}", column_index, width = column_width)?;
+        writeln!(f, "=== Tableau ===")?;
+        let objective = (-self.inverse_maintainer.get_objective_function_value()).to_string();
+        let cost = (0..self.nr_columns()).map(|j| {
+            self.relative_cost(j).to_string()
+        }).collect::<Vec<_>>();
+        let b = self.inverse_maintainer.b()
+            .data.iter().map(|v| v.to_string())
+            .collect::<Vec<_>>();
+        let columns = (0..self.nr_columns()).map(|j| {
+            let column = self.generate_column(j);
+            (0..self.nr_rows())
+                .map(|i| match column.column().get(i) {
+                    None => "".to_string(),
+                    Some(value) => value.to_string(),
+                })
+                .collect::<Vec<_>>()
+        }).collect::<Vec<_>>();
+
+        let row_counter_width = "cost".len();
+        let column_width = columns.iter().enumerate().map(|(j, column)| {
+            [
+                column.iter().map(String::len).max().unwrap(),
+                j.to_string().len(),
+                cost[j].len(),
+            ].iter().max().copied().unwrap()
+        }).collect::<Vec<_>>();
+
+        let b_inner_width = max(b.iter().map(String::len).max().unwrap(), objective.len());
+
+        // Column counters
+        write!(f, "{0:>width$} |", "", width = row_counter_width)?;
+        write!(f, " {0:^width$} |", "b", width = b_inner_width)?;
+        for (j, width) in column_width.iter().enumerate() {
+            write!(f, " {0:^width$}", j, width = width)?;
         }
         writeln!(f)?;
 
+        let total_width = (row_counter_width + 1) + 1 + (1 + b_inner_width + 1) + 1 +
+            column_width.iter().map(|l| 1 + l).sum::<usize>();
         // Separator
-        let total_width = counter_width + (1 + self.nr_columns()) * column_width;
         writeln!(f, "{}", "-".repeat(total_width))?;
 
         // Cost row
-        write!(f, "{0:>width$}", format!("{}  |", "cost"), width = counter_width)?;
-        let value = format!("{}", -self.inverse_maintainer.get_objective_function_value());
-        write!(f, "{0:^width$}", value, width = column_width)?;
-        write!(f, "|")?;
-        for column_index in 0..self.nr_columns() {
-            let number = format!("{}", self.relative_cost(column_index));
-            write!(f, "{0:^width$}", number, width = column_width)?;
+        write!(f, "{0:>width$} |", "cost", width = row_counter_width)?;
+        write!(f, " {0:^width$} |", objective, width = b_inner_width)?;
+        for (j, width) in column_width.iter().enumerate() {
+            write!(f, " {0:^width$}", cost[j], width = width)?;
         }
         writeln!(f)?;
 
@@ -327,16 +353,11 @@ where
         writeln!(f, "{}", "-".repeat(total_width))?;
 
         // Row counter and row data
-        for row_index in 0..self.nr_rows() {
-            write!(f, "{:>width$}", format!("{}  |", row_index), width = counter_width)?;
-            write!(f, "{0:^width$}", format!("{}", self.inverse_maintainer.b()[row_index]), width = column_width)?;
-            write!(f, "|")?;
-            for column_index in 0..self.nr_columns() {
-                let number = match self.generate_column(column_index).column().get(row_index) {
-                    Some(value) => value.to_string(),
-                    None => "0".to_string(),
-                };
-                write!(f, "{:^width$}", number, width = column_width)?;
+        for i in 0..self.nr_rows() {
+            write!(f, "{0:>width$} |", i, width = row_counter_width)?;
+            write!(f, " {0:^width$} |", b[i], width = b_inner_width)?;
+            for (j, width) in column_width.iter().enumerate() {
+                write!(f, " {0:^width$}", columns[j][i], width = width)?;
             }
             writeln!(f)?;
         }

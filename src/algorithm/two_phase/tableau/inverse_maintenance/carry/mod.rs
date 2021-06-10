@@ -697,14 +697,14 @@ where
     BI: BasisInverse<F=F>,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        writeln!(f, "Carry:\n============")?;
-        writeln!(f, "Objective function value: {}", self.get_objective_function_value())?;
+        // writeln!(f, "Carry:\n============")?;
+        // writeln!(f, "Objective function value: {}", self.get_objective_function_value())?;
         writeln!(f, "Column ordering:")?;
         writeln!(f, "{:?}", self.basis_indices)?;
         writeln!(f, "Minus PI:")?;
         <DenseVector<F> as Display>::fmt(&self.minus_pi, f)?;
-        writeln!(f, "b:")?;
-        <DenseVector<F> as Display>::fmt(&self.b, f)?;
+        // writeln!(f, "b:")?;
+        // <DenseVector<F> as Display>::fmt(&self.b, f)?;
         writeln!(f, "B^-1:")?;
 
         self.basis_inverse.fmt(f)?;

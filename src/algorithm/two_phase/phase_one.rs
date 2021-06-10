@@ -7,7 +7,7 @@ use crate::algorithm::two_phase::matrix_provider::column::Column;
 use crate::algorithm::two_phase::matrix_provider::column::identity::IdentityColumn;
 use crate::algorithm::two_phase::matrix_provider::MatrixProvider;
 use crate::algorithm::two_phase::strategy::pivot_rule::{FirstProfitableWithMemory, PivotRule};
-use crate::algorithm::two_phase::tableau::{is_in_basic_feasible_solution_state, Tableau};
+use crate::algorithm::two_phase::tableau::{debug_assert_in_basic_feasible_solution_state, Tableau};
 use crate::algorithm::two_phase::tableau::inverse_maintenance::{ColumnComputationInfo, InverseMaintener, ops as im_ops};
 use crate::algorithm::two_phase::tableau::kind::artificial::Artificial;
 use crate::algorithm::two_phase::tableau::kind::artificial::Cost;
@@ -133,13 +133,15 @@ where
 {
     let mut rule = PR::new();
     loop {
-        debug_assert!(is_in_basic_feasible_solution_state(&tableau));
+        debug_assert_in_basic_feasible_solution_state(&tableau);
 
         match rule.select_primal_pivot_column(&tableau) {
             Some((column_nr, cost)) => {
                 let column = tableau.generate_column(column_nr);
                 match tableau.select_primal_pivot_row(column.column()) {
-                    Some(row_nr) => tableau.bring_into_basis(column_nr, row_nr, column, cost),
+                    Some(row_nr) => {
+                        tableau.bring_into_basis(column_nr, row_nr, column, cost)
+                    },
                     None => panic!("Artificial cost can not be unbounded."),
                 }
             },
@@ -252,7 +254,7 @@ where
             rows_to_remove.push(artificial);
         }
 
-        debug_assert!(is_in_basic_feasible_solution_state(&tableau));
+        debug_assert_in_basic_feasible_solution_state(&tableau);
     }
 
     debug_assert!(rows_to_remove.is_sorted());

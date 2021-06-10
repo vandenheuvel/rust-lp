@@ -179,6 +179,11 @@ mod test {
             integer: 984_654_684,
             decimal_steps_from_right: 9,
         });
+        assert_eq!(Raw::try_from("-.95").unwrap(), Raw {
+            sign: Sign::Negative,
+            integer: 95,
+            decimal_steps_from_right: 2,
+        });
 
         // multiple digits, both sides
         assert_eq!(Raw::try_from("15465.2").unwrap(), Raw {

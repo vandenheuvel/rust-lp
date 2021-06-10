@@ -222,7 +222,7 @@ where
 
         let mut new_tuples = Vec::new();
 
-        let mut j = 0;
+        let mut j = 0;  // data index
         let old_data = mem::replace(&mut self.data, Vec::with_capacity(0));
         for (i, value) in old_data {
             while j < other.data.len() && other.data[j].0 < i {
@@ -282,12 +282,11 @@ where
     where
         for<'r> F: NonZero + MulAssign<&'r F>,
     {
-        debug_assert!(value.borrow().is_not_zero());
+        debug_assert!(value.is_not_zero());
 
         for (_, v) in &mut self.data {
             *v *= value;
         }
-        self.data.retain(|(_, v)| v.is_not_zero());
     }
 
     /// Divide each element of the vector by a value.
@@ -295,12 +294,11 @@ where
     where
        for<'r> F: NonZero + DivAssign<&'r F>,
     {
-        debug_assert!(value.borrow().is_not_zero());
+        debug_assert!(value.is_not_zero());
 
         for (_, v) in &mut self.data {
             *v /= value;
         }
-        self.data.retain(|(_, v)| v.is_not_zero());
     }
 }
 

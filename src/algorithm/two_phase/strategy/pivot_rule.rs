@@ -10,6 +10,7 @@ use crate::algorithm::two_phase::tableau::inverse_maintenance::{InverseMaintener
 use crate::algorithm::two_phase::tableau::kind::Kind;
 use crate::algorithm::two_phase::tableau::Tableau;
 use crate::data::linear_algebra::SparseTuple;
+use relp_num::NonZeroSigned;
 
 /// Deciding how to pivot.
 ///
