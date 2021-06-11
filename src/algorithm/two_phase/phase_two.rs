@@ -29,13 +29,7 @@ where
     PR: PivotRule,
 {
     let mut rule = PR::new();
-    let mut i = 0;
     loop {
-        // println!("{}", i);
-        if i >= 43 {
-            println!("{}", tableau);
-        }
-        i += 1;
         debug_assert_in_basic_feasible_solution_state(&tableau);
 
         match rule.select_primal_pivot_column(tableau) {
@@ -43,7 +37,6 @@ where
                 let column = tableau.generate_column(column_index);
                 match tableau.select_primal_pivot_row(column.column()) {
                     Some(row_index) => {
-                        println!("Pivot: {} {}", row_index, column_index);
                         tableau.bring_into_basis(
                             column_index,
                             row_index,
