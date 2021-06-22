@@ -20,7 +20,9 @@ fn small_example() {
 
     let mut general: GeneralForm<Rational64> = result.try_into().ok().unwrap();
 
-    let data = general.derive_matrix_data(true, false).ok().unwrap();
+    general.presolve().unwrap();
+    general.standardize();
+    let data = general.derive_matrix_data();
     let result = data.solve_relaxation::<Carry<RationalBig, LUDecomposition<_>>>();
 
     match result {

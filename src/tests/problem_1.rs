@@ -48,16 +48,17 @@ fn conversion_pipeline() {
     let mut general_form_computed: GeneralForm<T> = result.unwrap();
     assert_eq!(general_form_computed, general_form());
 
-    assert!(general_form_computed.standardize(true, false).is_ok());
+    let result = general_form_computed.presolve();
+    assert!(result.is_ok());
+
+    general_form_computed.standardize();
     // General form, standardized
     assert_eq!(general_form_computed, general_form_standardized());
 
     // Matrix data form
-    let result = general_form_computed.derive_matrix_data(true, false);
-    assert!(result.is_ok());
+    let matrix_data_form_computed = general_form_computed.derive_matrix_data();
 
     let (constraints, b, variables) = create_matrix_data_data();
-    let matrix_data_form_computed = result.unwrap();
     let matrix_data_form_expected = matrix_data_form(&constraints, &b, &variables);
     assert_eq!(matrix_data_form_computed, matrix_data_form_expected);
 

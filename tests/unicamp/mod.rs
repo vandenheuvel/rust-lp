@@ -57,7 +57,7 @@ where
     let mps = import::<GFT>(&path).unwrap();
 
     let mut general = mps.try_into().unwrap();
-    let data = match general.derive_matrix_data(true, false) {
+    match general.presolve() {
         Ok(data) => data,
         Err(LinearProgramType::FiniteOptimum(Solution {
                                                  objective_value, solution_values,
@@ -70,7 +70,9 @@ where
             }
         },
         _ => panic!(),
-    };
+    }
+    general.standardize();
+    let data = general.derive_matrix_data();
     let result = data.solve_relaxation::<Carry<IMT, LUDecomposition<_>>>();
 
     match result {

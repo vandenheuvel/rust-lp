@@ -449,17 +449,13 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
     }
 
     fn solve_single_columns(&self, row_increments: &(R::Power, Vec<R::Power>)) -> (R::Power, Vec<R::Power>) {
-        let factor = self.all_factors.last().unwrap();
         let (cost_row_increment, constraint_row_increments) = row_increments;
 
         let mut rhs_powers = self.b.iter().enumerate()
             .filter(|(_, factorization)| factorization.is_some())
             .map(|(row_index, factorization)| (row_index, factorization.as_ref().unwrap()))
             .map(|(row_index, factorization)| {
-                constraint_row_increments[row_index] + match factorization.last() {
-                    Some((f, power)) if f == factor => *power,
-                    _ => R::Power::zero(),
-                }
+                constraint_row_increments[row_index] + self.initial_exponent(factorization)
             }).collect::<Vec<_>>();
         rhs_powers.sort_unstable();
         let middle = rhs_powers.len() / 2;
@@ -471,10 +467,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
                 .map(|(row_index, factorization)| (constraint_row_increments[*row_index], factorization))
                 .chain(self.c[j].iter().map(|factorization| (*cost_row_increment, factorization)))
                 .map(|(increment, factorization)| {
-                increment + match factorization.last() {
-                    Some((f, power)) if f == factor => *power,
-                    _ => R::Power::zero(),
-                }
+                increment + self.initial_exponent(factorization)
             }).collect::<Vec<_>>();
             powers.sort_unstable();
             let middle = powers.len() / 2;
@@ -644,7 +637,7 @@ where
                 Sign::Positive => {
                     let mut iter = R::Power::zero();
                     while iter < column_change.abs() {
-                        column_scales[j] *= &factor;
+                        column_scales[j] /= &factor;
                         iter += R::Power::one();
                     }
                 },
@@ -652,7 +645,7 @@ where
                 Sign::Negative => {
                     let mut iter = R::Power::zero();
                     while iter < column_change.abs() {
-                        column_scales[j] /= &factor;
+                        column_scales[j] *= &factor;
                         iter += R::Power::one();
                     }
                 },
@@ -681,11 +674,11 @@ mod test {
     use crate::data::linear_program::general_form::presolve::scale::rational::{ColumnInfo, Factorization};
 
     #[test]
-    fn test_factorize() {
+    fn test_scale() {
         let mut general_form: GeneralForm<Rational8> = GeneralForm::new(
             Objective::Minimize,
             ColumnMajor::from_test_data::<_, _, u8>(&[
-                vec![1, 2],
+                vec![11, 2],
                 vec![4, 6],
                 vec![7, 14],
                 vec![0, 11],
@@ -719,25 +712,127 @@ mod test {
             R8!(16),
         );
 
-        let factorization = general_form.factorize();
+        let mut factorization = general_form.factorize();
 
         let expected = Factorization {
-            all_factors: vec![2, 3, 7, 11].into_iter().collect(),
+            all_factors: vec![2, 3, 7, 11],
             b: vec![Some(vec![(3, 1)]), None, Some(vec![(3, 1), (7, 1)]), Some(vec![(11, 1)])],
             c: vec![Some(vec![(2, 2)]), Some(vec![(11, 1)])],
             A: vec![
-                vec![(0, vec![]), (1, vec![(2, 2)]), (2, vec![(7, 1)])],
+                vec![(0, vec![(11, 1)]), (1, vec![(2, 2)]), (2, vec![(7, 1)])],
                 vec![(0, vec![(2, 1)]), (1, vec![(2, 1), (3, 1)]), (2, vec![(2, 1), (7, 1)]), (3, vec![(11, 1)])],
             ],
         };
-
         assert_eq!(factorization, expected);
+
+        let index = vec![
+            vec![(0, 0), (1, 0)],
+            vec![(0, 1), (1, 1)],
+            vec![(0, 2), (1, 2)],
+            vec![(1, 3)],
+        ];
+        let (column_info, gains) = factorization.solve_single_setup(&index);
+        let expected_column_info = (
+            Some(ColumnInfo {
+                lowest_value: 0,
+                lowest_count: 2,
+                highest_value: 1,
+            }),
+            vec![
+                ColumnInfo {
+                    lowest_value: 0,
+                    lowest_count: 3,
+                    highest_value: 1,
+                },
+                ColumnInfo {
+                    lowest_value: 0,
+                    lowest_count: 3,
+                    highest_value: 1,
+                },
+            ],
+        );
+        assert_eq!(column_info, expected_column_info);
+        let expected_gains = (
+            (0, 1),
+            vec![
+                (0, 4),
+                (0, 0),
+                (0, 0),
+                (0, 1 * 2 + 1 * 4),
+            ],
+        );
+        assert_eq!(gains, expected_gains);
+
+        let row_increments = factorization.solve_single_rows(gains, column_info, &index);
+        let expected_row_increments = (0, vec![0, 1, 1, 0]);
+
+        let column_changes = factorization.solve_single_columns(&row_increments);
+        let expected_column_changes = (1, vec![1, 1]);
+        assert_eq!(column_changes, expected_column_changes);
+
+        let factor = factorization.remove_factor_info();
+        let expected_factor = 11;
+        assert_eq!(factor, expected_factor);
+        let expected_factorization = Factorization {
+            all_factors: vec![2, 3, 7],
+            b: vec![Some(vec![(3, 1)]), None, Some(vec![(3, 1), (7, 1)]), Some(vec![])],
+            c: vec![Some(vec![(2, 2)]), Some(vec![])],
+            A: vec![
+                vec![(0, vec![]), (1, vec![(2, 2)]), (2, vec![(7, 1)])],
+                vec![(0, vec![(2, 1)]), (1, vec![(2, 1), (3, 1)]), (2, vec![(2, 1), (7, 1)]), (3, vec![])],
+            ],
+        };
+        assert_eq!(factorization, expected_factorization);
+
+        let scaling = general_form.scale();
+        let expected_scaling = Scaling {
+            c_factor: R8!(1),
+            constraint_row_factors: vec![R8!(1), R8!(1, 2), R8!(1, 7), R8!(1, 11)],
+            b_factor: R8!(1, 3),
+            constraint_column_factors: vec![R8!(1), R8!(1)],
+        };
+        let expected_general_form = GeneralForm::new(
+            Objective::Minimize,
+            ColumnMajor::from_test_data::<_, _, u8>(&[
+                vec![11, 2],
+                vec![2, 3],
+                vec![1, 2],
+                vec![0, 1],
+            ], 2),
+            vec![
+                RangedConstraintRelation::Equal,
+                RangedConstraintRelation::Less,
+                RangedConstraintRelation::Greater,
+                RangedConstraintRelation::Equal,
+            ],
+            DenseVector::new(vec![R8!(1), R8!(0), R8!(1), R8!(1, 3)], 4),
+            vec![
+                Variable {
+                    variable_type: VariableType::Continuous,
+                    cost: R8!(4),
+                    lower_bound: Some(R8!(0)),
+                    upper_bound: Some(R8!(6)),
+                    shift: R8!(0),
+                    flipped: false
+                },
+                Variable {
+                    variable_type: VariableType::Continuous,
+                    cost: R8!(11),
+                    lower_bound: Some(R8!(1)),
+                    upper_bound: Some(R8!(2)),
+                    shift: R8!(0),
+                    flipped: false
+                },
+            ],
+            vec!["x".to_string(), "y".to_string()],
+            R8!(16),
+        );
     }
 
     #[test]
     fn test_solve_single_setup_without_b() {
         let factorization = Factorization::<Rational16> {
-            all_factors: vec![2, 3, 7, 11].into_iter().collect(),
+            all_factors: vec![2, 3, 7, 11],
             b: vec![None, None, None, None],
             c: vec![Some(vec![(11, 1)]), Some(vec![(2, 2)])],
             A: vec![
@@ -781,146 +876,5 @@ mod test {
             )
         );
         assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_solve_single_setup_with_b() {
-        let factorization = Factorization::<Rational16> {
-            all_factors: vec![2, 3, 7, 11].into_iter().collect(),
-            b: vec![Some(vec![(3, 1)]), None, Some(vec![(3, 1), (7, 1)]), Some(vec![(11, 1)])],
-            c: vec![Some(vec![(11, 1)]), Some(vec![(2, 2)])],
-            A: vec![
-                vec![(0, vec![]), (1, vec![(2, 2)]), (2, vec![(7, 1)])],
-                vec![(0, vec![(2, 1)]), (1, vec![(2, 1), (3, 1)]), (2, vec![(2, 1), (7, 1)]), (3, vec![(11, 1)])],
-            ],
-        };
-
-        let index = vec![
-            vec![(0, 0), (1, 0)],
-            vec![(0, 1), (1, 1)],
-            vec![(0, 2), (1, 2)],
-            vec![(1, 3)],
-        ];
-        let result = factorization.solve_single_setup(&index);
-        // For the highest factor, so factor `11`
-        let expected = (
-            (
-                Some(ColumnInfo {
-                    lowest_value: 0,
-                    lowest_count: 2,
-                    highest_value: 1,
-                }),
-                vec![
-                    ColumnInfo {
-                        lowest_value: 0,
-                        lowest_count: 3,
-                        highest_value: 1,
-                    },
-                    ColumnInfo {
-                        lowest_value: 0,
-                        lowest_count: 4,
-                        highest_value: 1,
-                    },
-                ],
-            ),
-            (
-                (0, 1),
-                vec![
-                    (0, 0),
-                    (0, 0),
-                    (0, 0),
-                    (0, 1 * 2 + 1 * 4),
-                ],
-            )
-        );
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn test_solve_single_rows() {
-
-    }
-
-    #[test]
-    fn test_scale() {
-        let mut general_form: GeneralForm<Rational8> = GeneralForm::new(
-            Objective::Minimize,
-            ColumnMajor::from_test_data::<_, _, u8>(&[
-                vec![1, 2],
-                vec![4, 6],
-                vec![7, 14],
-            ], 2),
-            vec![
-                RangedConstraintRelation::Equal,
-                RangedConstraintRelation::Less,
-                RangedConstraintRelation::Greater,
-            ],
-            DenseVector::from_test_data::<u8>(vec![3, 12, 21]),
-            vec![
-                Variable {
-                    variable_type: VariableType::Continuous,
-                    cost: R8!(11),
-                    lower_bound: Some(R8!(0)),
-                    upper_bound: Some(R8!(6)),
-                    shift: R8!(0),
-                    flipped: false
-                },
-                Variable {
-                    variable_type: VariableType::Continuous,
-                    cost: R8!(4),
-                    lower_bound: Some(R8!(1)),
-                    upper_bound: Some(R8!(2)),
-                    shift: R8!(0),
-                    flipped: false
-                },
-            ],
-            vec!["x".to_string(), "y".to_string()],
-            R8!(16),
-        );
-
-        let scaling = general_form.scale();
-
-        let expected = GeneralForm::new(
-            Objective::Minimize,
-            ColumnMajor::from_test_data::<_, _, u8>(&[
-                vec![1, 1],
-                vec![4, 3],
-                vec![1, 1],
-            ], 2),
-            vec![
-                RangedConstraintRelation::Equal,
-                RangedConstraintRelation::Less,
-                RangedConstraintRelation::Greater,
-            ],
-            DenseVector::from_test_data::<u8>(vec![3, 6, 3]),
-            vec![
-                Variable {
-                    variable_type: VariableType::Continuous,
-                    cost: R8!(11),
-                    lower_bound: Some(R8!(0)),
-                    upper_bound: Some(R8!(6)),
-                    shift: R8!(0),
-                    flipped: false,
-                },
-                Variable {
-                    variable_type: VariableType::Continuous,
-                    cost: R8!(2),
-                    lower_bound: Some(R8!(1, 2)),
-                    upper_bound: Some(R8!(1)),
-                    shift: R8!(0),
-                    flipped: false,
-                },
-            ],
-            vec!["x".to_string(), "y".to_string()],
-            R8!(16),
-        );
-
-        assert_eq!(general_form, expected);
-        assert_eq!(scaling, Scaling {
-            c_factor: R8!(0),
-            constraint_row_factors: vec![R8!(1), R8!(1, 2)],
-            b_factor: R8!(0),
-            constraint_column_factors: vec![R8!(1), R8!(1, 2), R8!(1, 7)]
-        });
     }
 }

@@ -9,7 +9,7 @@ use std::fmt::{Debug, Display};
 use std::iter::Sum;
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, DivAssign, Mul, MulAssign, Neg};
-use std::slice::Iter;
+use std::slice::{Iter, IterMut};
 
 use num_traits::{One, Zero};
 use relp_num::NonZero;
@@ -155,6 +155,10 @@ where
 
     fn iter_values(&self) -> Iter<Self::Inner> {
         self.data.iter()
+    }
+
+    fn iter_values_mut(&mut self) -> IterMut<Self::Inner> {
+        self.data.iter_mut()
     }
 
     /// The length of this vector.

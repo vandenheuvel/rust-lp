@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use std::fmt::{Debug, Display};
 use std::fmt;
 use std::ops::{AddAssign, Index, IndexMut, Mul};
-use std::slice::Iter;
+use std::slice::{Iter, IterMut};
 
 use num_traits::Zero;
 
@@ -131,6 +131,10 @@ impl<F: PartialEq + Display + Debug> Vector<F> for Dense<F> {
     /// Iterate over the values of this vector.
     fn iter_values(&self) -> Iter<Self::Inner> {
         self.data.iter()
+    }
+
+    fn iter_values_mut(&mut self) -> IterMut<Self::Inner> {
+        self.data.iter_mut()
     }
 
     /// The length of this vector.

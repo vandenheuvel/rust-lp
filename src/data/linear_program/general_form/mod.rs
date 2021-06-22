@@ -28,6 +28,7 @@ use crate::data::linear_program::general_form::RemovedVariable::{FunctionOfOther
 use crate::data::linear_program::solution::Solution;
 
 mod presolve;
+pub use presolve::scale::{Scalable, Scaling};
 
 /// A linear program in general form.
 ///
@@ -257,9 +258,7 @@ where
     /// # Errors
     ///
     /// In case the linear program gets solved during this presolve operation, a solution.
-    pub fn derive_matrix_data(&mut self, presolve: bool, scale: bool) -> Result<MatrixData<OF>, LinearProgramType<OF>> {
-        self.standardize(presolve, scale)?;
-
+    pub fn derive_matrix_data(&mut self) -> MatrixData<OF> {
         let (
             nr_equality,
             nr_range,
@@ -273,7 +272,7 @@ where
                 _ => unreachable!("Constraint types were just sorted, and there should only be ranges here."),
             }).collect();
 
-        Ok(MatrixData::new(
+        MatrixData::new(
             &self.constraints,
             &self.b,
             ranges,
@@ -282,7 +281,7 @@ where
             nr_upper,
             nr_lower,
             &self.variables,
-        ))
+        )
     }
 
     /// Convert this `GeneralForm` problem to a form closer to the standard form representation.
@@ -305,19 +304,10 @@ where
     /// # Errors
     ///
     /// In case the linear program gets solved during this presolve operation, a solution.
-    pub fn standardize(&mut self, presolve: bool, scale: bool) -> Result<(), LinearProgramType<OF>> {
-        if presolve {
-            self.presolve()?;
-        }
+    pub fn standardize(&mut self) {
         self.transform_variables();
         self.make_b_non_negative();
         self.make_minimization_problem();
-        // TODO
-        // if scale {
-        //     self.scale();
-        // }
-
-        Ok(())
     }
 
     /// Recursively analyse constraints and variable bounds and eliminating or tightning these.
@@ -337,7 +327,7 @@ where
     ///
     /// If the linear program gets solved during this presolve operation, a `Result::Err` return
     /// value containing the solution.
-    pub(crate) fn presolve(&mut self) -> Result<(), LinearProgramType<OF>> {
+    pub fn presolve(&mut self) -> Result<(), LinearProgramType<OF>> {
         let Changes {
             b,
             constraints,

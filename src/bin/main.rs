@@ -12,15 +12,18 @@ use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper
 use relp::data::linear_program::elements::LinearProgramType;
 use relp::data::linear_program::general_form::GeneralForm;
 use relp::io::import;
+use relp::data::linear_program::general_form::Scalable;
 
-/// A linear program solver written in rust.
+/// An exact linear program solver written in rust.
 #[derive(Clap)]
 #[clap(version = "0.0.4", author = "Bram van den Heuvel <bram@vandenheuvel.online>")]
 struct Opts {
     /// File containing the problem description
     problem_file: String,
+    /// Disable presolving
     #[clap(long)]
     no_presolve: bool,
+    /// Disable prescaling
     #[clap(long)]
     no_scale: bool,
 }
@@ -37,27 +40,40 @@ fn main() {
     let mut general: GeneralForm<RationalBig> = mps.try_into()
         .expect("Problem is inconsistent");
 
-    println!("Presolving...");
-    let data = match general.derive_matrix_data(!opts.no_presolve, !opts.no_scale) {
-        Ok(presolved_data) => presolved_data,
-        Err(program_type) => {
+    if !opts.no_presolve {
+        println!("Presolving...");
+        if let Err(program_type) = general.presolve() {
             match program_type {
                 LinearProgramType::FiniteOptimum(solution) => {
-                    println!("Solution computed.\n{}", solution.to_string())
+                    println!("Solution computed during presolve.\n{}", solution.to_string())
                 },
                 LinearProgramType::Infeasible => println!("Problem is not feasible."),
                 LinearProgramType::Unbounded => println!("Problem is unbounded."),
             }
             exit(0);
-        },
+        }
+    }
+
+    general.standardize();
+
+    let scaling = if !opts.no_scale {
+        println!("Scaling...");
+        Some(general.scale())
+    } else {
+        None
     };
+
+    let data = general.derive_matrix_data();
 
     println!("Solving relaxation...");
     let result = data.solve_relaxation::<Carry<RationalBig, LUDecomposition<_>>>();
 
     println!("Solution computed:");
     match result {
-        OptimizationResult::FiniteOptimum(vector) => {
+        OptimizationResult::FiniteOptimum(mut vector) => {
+            if let Some(scaling) = scaling {
+                scaling.scale_back(&mut vector);
+            }
             let reconstructed = data.reconstruct_solution(vector);
             let solution = general.compute_full_solution_with_reduced_solution(reconstructed);
             println!("{}", solution.to_string());

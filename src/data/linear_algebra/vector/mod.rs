@@ -4,7 +4,7 @@
 //! operations needs to be done quickly with these types.
 use std::fmt::{Debug, Display};
 use std::ops::{AddAssign, Mul};
-use std::slice::Iter;
+use std::slice::{Iter, IterMut};
 
 use num_traits::Zero;
 use relp_num::NonZero;
@@ -58,6 +58,8 @@ pub trait Vector<F>: PartialEq + Display + Debug {
     fn remove_indices(&mut self, indices: &[usize]);
     /// Iterate over the internal values.
     fn iter_values(&self) -> Iter<Self::Inner>;
+
+    fn iter_values_mut(&mut self) -> IterMut<Self::Inner>;
     /// Number of items represented by the vector.
     fn len(&self) -> usize;
     /// Whether the vector is empty.
