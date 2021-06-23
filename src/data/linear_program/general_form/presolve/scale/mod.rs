@@ -19,9 +19,8 @@ impl<T: One + SparseElement<T> + SparseComparator + Clone> Scalable<T> for Gener
     default fn scale(&mut self) -> Scaling<T> {
         // TODO(CORRECTNESS): Are these the right sizes?
         Scaling {
-            c_factor: T::one(),
+            cost_factor: T::one(),
             constraint_row_factors: vec![T::one(); self.nr_active_constraints()],
-            b_factor: T::one(),
             constraint_column_factors: vec![T::one(); self.nr_active_variables()]
         }
         // TODO(LOGGING): Log that no scaling is done.
@@ -36,9 +35,8 @@ impl<T: One + SparseElement<T> + SparseComparator + Clone> Scalable<T> for Gener
 
 #[derive(Eq, PartialEq, Debug)]
 pub struct Scaling<R> {
-    c_factor: R,
+    cost_factor: R,
     constraint_row_factors: Vec<R>,
-    b_factor: R,
     constraint_column_factors: Vec<R>,
 }
 

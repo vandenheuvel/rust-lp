@@ -12,6 +12,8 @@ use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
 use crate::data::linear_program::general_form::GeneralForm;
 use crate::data::linear_program::general_form::presolve::scale::{Scalable, Scaling};
 use std::iter;
+use crate::data::linear_program::elements::BoundDirection;
+
 impl<R> Scalable<R> for GeneralForm<R>
 where
     for<'r> R:
@@ -44,22 +46,31 @@ where
 
         // Apply the scaling
         let Scaling {
-            c_factor,
+            cost_factor,
             constraint_row_factors,
-            b_factor,
             constraint_column_factors,
         } = &scaling;
-        for variable in &mut self.variables {
-            variable.cost *= c_factor;
-        }
-        for rhs in &mut self.b.data {
-            *rhs *= b_factor;
+        for (j, variable) in self.variables.iter_mut().enumerate() {
+            variable.cost *= cost_factor / &constraint_column_factors[j];
         }
         for (j, column) in self.constraints.data.iter_mut().enumerate() {
+            let column_factor = &constraint_column_factors[j];
+
+            let variable = &mut self.variables[j];
+            variable.cost *= cost_factor / column_factor;
+            if let Some(bound) = &mut variable.lower_bound {
+                *bound /= column_factor;
+            }
+            if let Some(bound) = &mut variable.upper_bound {
+                *bound /= column_factor;
+            }
+
             for (i, value) in column {
+                let row_factor = &constraint_row_factors[*i];
                 // The row_scales value is large, the column_scales value is small, so combine them
                 // first, some factors might cancel
-                *value *= &constraint_row_factors[*i] * &constraint_column_factors[j];
+                *value *= row_factor / column_factor;
+                self.b.data[*i] *= row_factor;
             }
         }
 
@@ -67,16 +78,32 @@ where
     }
 
     fn scale_back(&mut self, scaling: Scaling<R>) {
-        for variable in &mut self.variables {
-            variable.cost /= &scaling.c_factor;
-        }
-        for rhs in &mut self.b.data {
-            *rhs /= &scaling.b_factor;
+        let Scaling {
+            cost_factor,
+            constraint_row_factors,
+            constraint_column_factors,
+        } = &scaling;
+        for (j, variable) in self.variables.iter_mut().enumerate() {
+            variable.cost /= cost_factor / &constraint_column_factors[j];
         }
         for (j, column) in self.constraints.data.iter_mut().enumerate() {
+            let column_factor = &constraint_column_factors[j];
+
+            let variable = &mut self.variables[j];
+            variable.cost /= cost_factor / column_factor;
+            if let Some(bound) = &mut variable.lower_bound {
+                *bound *= column_factor;
+            }
+            if let Some(bound) = &mut variable.upper_bound {
+                *bound *= column_factor;
+            }
+
             for (i, value) in column {
-                // The row_scales value is large, the column_scales value is small
-                *value /= &scaling.constraint_column_factors[j] * &scaling.constraint_row_factors[*i];
+                let row_factor = &constraint_row_factors[*i];
+                // The row_scales value is large, the column_scales value is small, so combine them
+                // first, some factors might cancel
+                *value /= row_factor / column_factor;
+                self.b.data[*i] /= row_factor;
             }
         }
     }
@@ -92,19 +119,22 @@ struct ColumnInfo<P> {
     highest_value: P,
 }
 
+type Factorization<R: NonZeroFactorizable> = Vec<(R::Factor, R::Power)>;
+
 #[derive(Eq, PartialEq, Debug)]
-struct Factorization<R: NonZeroFactorizable> {
+struct GeneralFormFactorization<R: NonZeroFactorizable> {
     /// No duplicate elements
     all_factors: Vec<R::Factor>,
     /// Zero values are None, others have a factorization that might be empty
-    b: Vec<Option<Vec<(R::Factor, R::Power)>>>,
-    c: Vec<Option<Vec<(R::Factor, R::Power)>>>,
+    b: Vec<Option<Factorization<R>>>,
+    c: Vec<Option<Factorization<R>>>,
+    bounds: Vec<(Option<Factorization<R>>, Option<Factorization<R>>)>,
     /// Column major
-    A: Vec<Vec<SparseTuple<Vec<(R::Factor, R::Power)>>>>,
+    A: Vec<Vec<SparseTuple<Factorization<R>>>>,
 }
 
-impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
-    fn solve(mut self) -> Vec<(R::Factor, ((R::Power, Vec<R::Power>), (R::Power, Vec<R::Power>)))> {
+impl<R: NonZeroFactorizable<Power: Zero + Ord>> GeneralFormFactorization<R> {
+    fn solve(mut self) -> Vec<(R::Factor, ((R::Power, Vec<R::Power>), Vec<R::Power>))> {
         // Row major column indices
         let index = {
             let mut index = vec![Vec::new(); self.A.len()];
@@ -125,7 +155,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
 
         results
     }
-    fn solve_single(&mut self, index: &Vec<Vec<(usize, usize)>>) -> (R::Factor, ((R::Power, Vec<R::Power>), (R::Power, Vec<R::Power>))) {
+    fn solve_single(&mut self, index: &Vec<Vec<(usize, usize)>>) -> (R::Factor, ((R::Power, Vec<R::Power>), Vec<R::Power>)) {
         let (column_info, gains) = self.solve_single_setup(index);
         let row_increments = self.solve_single_rows(gains, column_info, index);
         let column_changes = self.solve_single_columns(&row_increments);
@@ -141,7 +171,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
             let mut extreme_values = None;
             let mut lowest_count = 0;
 
-            for value in &self.b {
+            let mut update = |value: Option<&Factorization<R>>| {
                 if let Some(factorization) = value {
                     let exponent = self.initial_exponent(factorization);
                     match &mut extreme_values {
@@ -161,6 +191,15 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
                         }
                     }
                 }
+            };
+
+            for value in &self.b {
+                update(value.as_ref());
+            }
+
+            for (lower, upper) in &self.bounds {
+                update(lower.as_ref());
+                update(upper.as_ref());
             }
 
             extreme_values.map(|(lowest_value, highest_value)| {
@@ -170,9 +209,8 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
 
         let infos = self.A.iter().enumerate().map(|(j, column)| {
                 let first_power = self.initial_exponent(&column[0].1);
-                let mut lowest_value = first_power;
+                let (mut lowest_value, mut highest_value) = (first_power, first_power);
                 let mut lowest_count = 1;
-                let mut highest_value = first_power;
 
                 let mut update = |power| {
                     if power < lowest_value {
@@ -193,6 +231,14 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
                 if let Some(factorization) = &self.c[j] {
                     let power = self.initial_exponent(factorization);
                     update(power);
+                }
+
+                // Bounds are represented by a value of `1` in the column
+                if self.bounds[j].0.is_some() {
+                    update(R::Power::zero());
+                }
+                if self.bounds[j].1.is_some() {
+                    update(R::Power::zero());
                 }
 
                 ColumnInfo { lowest_value, lowest_count, highest_value }
@@ -365,7 +411,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
                     exponent,
                     self.A[j].iter().map(|(_, factorization)| factorization),
                     &mut constraint_column_info[j],
-                    gain, penalty,
+                    gain, penalty,1,
                 );
             }
         }
@@ -379,6 +425,8 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
         constraint_row_increments: &Vec<R::Power>,
         index: &Vec<Vec<(usize, usize)>>,
     ) {
+        let (b_weight, constraint_column_weight) = self.relative_column_weight();
+
         let (gain, penalty) = &mut constraint_row_gains[row_index];
         if let Some(factorization) = &self.b[row_index] {
             let initial_exponent = self.initial_exponent(factorization);
@@ -387,7 +435,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
                 exponent,
                 self.b.iter().filter_map(Option::as_ref),
                 rhs_info.as_mut().unwrap(),
-                gain, penalty,
+                gain, penalty, b_weight,
             );
         }
 
@@ -399,7 +447,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
                 exponent,
                 self.A[column].iter().map(|(_, factorization)| factorization),
                 &mut constraint_column_info[column],
-                gain, penalty,
+                gain, penalty, constraint_column_weight,
             );
         }
     }
@@ -422,11 +470,12 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
         column: impl Iterator<Item = &'a Vec<(R::Factor, R::Power)>>,
         info: &mut ColumnInfo<R::Power>,
         gain: &mut usize, penalty: &mut usize,
+        weight: usize,
     ) {
         if exponent == info.lowest_value {
             info.lowest_count -= 1;
             if info.lowest_count == 0 {
-                *gain -= 1;
+                *gain -= weight;
 
                 // A new lost value, scan for the count
                 info.lowest_value += R::Power::one();
@@ -440,7 +489,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
             }
         }
         if exponent == info.highest_value - R::Power::one() {
-            *penalty += 1;
+            *penalty += weight;
         }
         if exponent == info.highest_value {
             info.highest_value += R::Power::one();
@@ -448,24 +497,15 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
         }
     }
 
-    fn solve_single_columns(&self, row_increments: &(R::Power, Vec<R::Power>)) -> (R::Power, Vec<R::Power>) {
+    fn solve_single_columns(&self, row_increments: &(R::Power, Vec<R::Power>)) -> Vec<R::Power> {
         let (cost_row_increment, constraint_row_increments) = row_increments;
-
-        let mut rhs_powers = self.b.iter().enumerate()
-            .filter(|(_, factorization)| factorization.is_some())
-            .map(|(row_index, factorization)| (row_index, factorization.as_ref().unwrap()))
-            .map(|(row_index, factorization)| {
-                constraint_row_increments[row_index] + self.initial_exponent(factorization)
-            }).collect::<Vec<_>>();
-        rhs_powers.sort_unstable();
-        let middle = rhs_powers.len() / 2;
-        debug_assert!(!rhs_powers.is_empty(), "At least one element per column (even if zero).");
-        let rhs_middle_power = rhs_powers[middle];
 
         let constraint_columns = self.A.iter().enumerate().map(|(j, column)| {
             let mut powers = column.iter()
                 .map(|(row_index, factorization)| (constraint_row_increments[*row_index], factorization))
                 .chain(self.c[j].iter().map(|factorization| (*cost_row_increment, factorization)))
+                .chain(self.bounds[j].0.iter().map(|factorization| (R::Power::zero(), factorization)))
+                .chain(self.bounds[j].1.iter().map(|factorization| (R::Power::zero(), factorization)))
                 .map(|(increment, factorization)| {
                 increment + self.initial_exponent(factorization)
             }).collect::<Vec<_>>();
@@ -475,7 +515,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
             powers[middle]
         }).collect();
 
-        (rhs_middle_power, constraint_columns)
+        constraint_columns
     }
 
     fn remove_factor_info(&mut self) -> R::Factor {
@@ -504,6 +544,21 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
         remove_from(&mut self.b);
         remove_from(&mut self.c);
 
+        for (maybe_lower, maybe_upper) in &mut self.bounds {
+            if let Some(factorization) = maybe_lower {
+                match factorization.last() {
+                    Some((f, _)) if f == &factor => {factorization.pop();},
+                    _ => {},
+                }
+            }
+            if let Some(factorization) = maybe_upper {
+                match factorization.last() {
+                    Some((f, _)) if f == &factor => {factorization.pop();},
+                    _ => {},
+                }
+            }
+        }
+
         factor
     }
 
@@ -517,6 +572,7 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> Factorization<R> {
 
 enum RowToIncrement {
     CostRow,
+    /// Index of the constraint
     ConstraintRow(usize),
 }
 
@@ -524,14 +580,17 @@ impl<R> GeneralForm<R>
 where
     R: NonZeroFactorizable<Factor: Hash> + SparseElement<R> + SparseComparator,
 {
-    fn factorize(&self) -> Factorization<R> {
+    fn factorize(&self) -> GeneralFormFactorization<R> {
         let mut all_factors = HashSet::new();
+        let mut add = |factorization: &Factorization<R>|
+            all_factors.extend(factorization.iter().map(|(f, _)| f).cloned());
 
         let b = self.b.data.iter()
             .map(|v| {
                 if v.is_not_zero() {
                     let NonZeroFactorization { factors, .. } = v.factorize();
-                    all_factors.extend(factors.iter().map(|(f, _)| f).cloned());
+                    add(&factors);
+
                     Some(factors)
                 } else {
                     None
@@ -539,13 +598,26 @@ where
             })
             .collect();
 
-        let c = self.variables.iter()
+        let (c, bounds): (Vec<_>, Vec<_>) = self.variables.iter()
             .map(|variable| {
                 let NonZeroFactorization { factors, .. } = variable.cost.factorize();
-                all_factors.extend(factors.iter().map(|(f, _)| f).cloned());
-                Some(factors)
+                add(&factors);
+
+                let mut get_bound = |bound: Option<&R>| {
+                    bound.map(|value| {
+                        if value.is_not_zero() {
+                            let NonZeroFactorization { factors, .. } = value.factorize();
+                            add(&factors);
+                            Some(factors)
+                        } else { None }
+                    }).flatten()
+                };
+                let lower_bound = get_bound(variable.lower_bound.as_ref());
+                let upper_bound = get_bound(variable.upper_bound.as_ref());
+
+                (Some(factors), (lower_bound, upper_bound))
             })
-            .collect();
+            .unzip();
 
         let A = self.constraints.iter_columns().map(|column| {
             column.iter().map(|(i, v)| {
@@ -557,12 +629,12 @@ where
 
         let mut all_factors = all_factors.into_iter().collect::<Vec<_>>();
         all_factors.sort_unstable();
-        Factorization { all_factors, b, c, A }
+        GeneralFormFactorization { all_factors, b, c, bounds, A }
     }
 }
 
 fn total_scaling<R>(
-    scale_per_factor: Vec<(R::Factor, ((R::Power, Vec<R::Power>), (R::Power, Vec<R::Power>)))>,
+    scale_per_factor: Vec<(R::Factor, ((R::Power, Vec<R::Power>), Vec<R::Power>))>,
 ) -> Scaling<R>
 where
     R: NonZeroFactorizable<Power: Abs>,
@@ -571,19 +643,18 @@ where
     debug_assert!(!scale_per_factor.is_empty());
 
     let nr_rows = scale_per_factor[0].1.0.1.len();
-    let nr_columns = scale_per_factor[0].1.1.1.len();
+    let nr_columns = scale_per_factor[0].1.1.len();
 
-    let mut c_factor = R::one();
-    let mut row_scales = vec![R::one(); nr_rows];
-    let mut b_factor = R::one();
-    let mut column_scales = vec![R::one(); nr_columns];
+    let mut cost_factor = R::one();
+    let mut constraint_row_factors = vec![R::one(); nr_rows];
+    let mut constraint_column_factors = vec![R::one(); nr_columns];
 
-    for (factor, ((c_change, row_changes), (b_change, column_changes))) in scale_per_factor {
+    for (factor, ((c_change, row_changes), column_changes)) in scale_per_factor {
         match c_change.signum() {
             Sign::Positive => {
                 let mut iter = R::Power::zero();
                 while iter < c_change.abs() {
-                    c_factor *= &factor;
+                    cost_factor *= &factor;
                     iter += R::Power::one();
                 }
             }
@@ -591,7 +662,7 @@ where
             Sign::Negative => {
                 let mut iter = R::Power::zero();
                 while iter < c_change.abs() {
-                    c_factor /= &factor;
+                    cost_factor /= &factor;
                     iter += R::Power::one();
                 }
             }
@@ -601,7 +672,7 @@ where
                 Sign::Positive => {
                     let mut iter = R::Power::zero();
                     while iter < row_change.abs() {
-                        row_scales[i] *= &factor;
+                        constraint_row_factors[i] *= &factor;
                         iter += R::Power::one();
                     }
                 },
@@ -609,27 +680,10 @@ where
                 Sign::Negative => {
                     let mut iter = R::Power::zero();
                     while iter < row_change.abs() {
-                        row_scales[i] /= &factor;
+                        constraint_row_factors[i] /= &factor;
                         iter += R::Power::one();
                     }
                 },
-            }
-        }
-        match b_change.signum() {
-            Sign::Positive => {
-                let mut iter = R::Power::zero();
-                while iter < b_change.abs() {
-                    b_factor *= &factor;
-                    iter += R::Power::one();
-                }
-            }
-            Sign::Zero => {}
-            Sign::Negative => {
-                let mut iter = R::Power::zero();
-                while iter < b_change.abs() {
-                    b_factor /= &factor;
-                    iter += R::Power::one();
-                }
             }
         }
         for (j, column_change) in column_changes.into_iter().enumerate() {
@@ -637,7 +691,7 @@ where
                 Sign::Positive => {
                     let mut iter = R::Power::zero();
                     while iter < column_change.abs() {
-                        column_scales[j] /= &factor;
+                        constraint_column_factors[j] /= &factor;
                         iter += R::Power::one();
                     }
                 },
@@ -645,7 +699,7 @@ where
                 Sign::Negative => {
                     let mut iter = R::Power::zero();
                     while iter < column_change.abs() {
-                        column_scales[j] *= &factor;
+                        constraint_column_factors[j] *= &factor;
                         iter += R::Power::one();
                     }
                 },
@@ -654,10 +708,9 @@ where
     }
 
     Scaling {
-        c_factor,
-        constraint_row_factors: row_scales,
-        b_factor,
-        constraint_column_factors: column_scales,
+        cost_factor,
+        constraint_row_factors,
+        constraint_column_factors,
     }
 }
 
@@ -671,7 +724,7 @@ mod test {
     use crate::data::linear_program::elements::{Objective, RangedConstraintRelation, VariableType};
     use crate::data::linear_program::general_form::{GeneralForm, Variable};
     use crate::data::linear_program::general_form::presolve::scale::{Scalable, Scaling};
-    use crate::data::linear_program::general_form::presolve::scale::rational::{ColumnInfo, Factorization};
+    use crate::data::linear_program::general_form::presolve::scale::rational::{ColumnInfo, GeneralFormFactorization};
 
     #[test]
     fn test_scale() {
@@ -714,10 +767,11 @@ mod test {
 
         let mut factorization = general_form.factorize();
 
-        let expected = Factorization {
+        let expected = GeneralFormFactorization {
             all_factors: vec![2, 3, 7, 11],
             b: vec![Some(vec![(3, 1)]), None, Some(vec![(3, 1), (7, 1)]), Some(vec![(11, 1)])],
             c: vec![Some(vec![(2, 2)]), Some(vec![(11, 1)])],
+            bounds: vec![(None, Some(vec![(2, 1), (3, 1)])), (Some(vec![]), Some(vec![(2, 1)]))],
             A: vec![
                 vec![(0, vec![(11, 1)]), (1, vec![(2, 2)]), (2, vec![(7, 1)])],
                 vec![(0, vec![(2, 1)]), (1, vec![(2, 1), (3, 1)]), (2, vec![(2, 1), (7, 1)]), (3, vec![(11, 1)])],
@@ -735,18 +789,18 @@ mod test {
         let expected_column_info = (
             Some(ColumnInfo {
                 lowest_value: 0,
-                lowest_count: 2,
+                lowest_count: 5,
                 highest_value: 1,
             }),
             vec![
                 ColumnInfo {
                     lowest_value: 0,
-                    lowest_count: 3,
+                    lowest_count: 4,
                     highest_value: 1,
                 },
                 ColumnInfo {
                     lowest_value: 0,
-                    lowest_count: 3,
+                    lowest_count: 5,
                     highest_value: 1,
                 },
             ],
@@ -767,16 +821,17 @@ mod test {
         let expected_row_increments = (0, vec![0, 1, 1, 0]);
 
         let column_changes = factorization.solve_single_columns(&row_increments);
-        let expected_column_changes = (1, vec![1, 1]);
+        let expected_column_changes = vec![1, 1];
         assert_eq!(column_changes, expected_column_changes);
 
         let factor = factorization.remove_factor_info();
         let expected_factor = 11;
         assert_eq!(factor, expected_factor);
-        let expected_factorization = Factorization {
+        let expected_factorization = GeneralFormFactorization {
             all_factors: vec![2, 3, 7],
             b: vec![Some(vec![(3, 1)]), None, Some(vec![(3, 1), (7, 1)]), Some(vec![])],
             c: vec![Some(vec![(2, 2)]), Some(vec![])],
+            bounds: vec![(None, Some(vec![(2, 1), (3, 1)])), (Some(vec![]), Some(vec![(2, 1)]))],
             A: vec![
                 vec![(0, vec![]), (1, vec![(2, 2)]), (2, vec![(7, 1)])],
                 vec![(0, vec![(2, 1)]), (1, vec![(2, 1), (3, 1)]), (2, vec![(2, 1), (7, 1)]), (3, vec![])],
@@ -786,9 +841,8 @@ mod test {
 
         let scaling = general_form.scale();
         let expected_scaling = Scaling {
-            c_factor: R8!(1),
+            cost_factor: R8!(1),
             constraint_row_factors: vec![R8!(1), R8!(1, 2), R8!(1, 7), R8!(1, 11)],
-            b_factor: R8!(1, 3),
             constraint_column_factors: vec![R8!(1), R8!(1)],
         };
         let expected_general_form = GeneralForm::new(
@@ -831,10 +885,11 @@ mod test {
 
     #[test]
     fn test_solve_single_setup_without_b() {
-        let factorization = Factorization::<Rational16> {
+        let factorization = GeneralFormFactorization::<Rational16> {
             all_factors: vec![2, 3, 7, 11],
             b: vec![None, None, None, None],
             c: vec![Some(vec![(11, 1)]), Some(vec![(2, 2)])],
+            bounds: vec![(None, None), (None, None)],
             A: vec![
                 vec![(0, vec![]), (1, vec![(2, 2)]), (2, vec![(7, 1)])],
                 vec![(0, vec![(2, 1)]), (1, vec![(2, 1), (3, 1)]), (2, vec![(2, 1), (7, 1)]), (3, vec![(11, 1)])],
