@@ -55,9 +55,9 @@ fn solve(file_name: &str) -> Solution<S> {
 
     let mut general: GeneralForm<T> = mps.try_into().unwrap();
     general.presolve().unwrap();
-    general.standardize();
+    let constraint_type_counts = general.standardize();
     general.scale();
-    let data = general.derive_matrix_data();
+    let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<S, BasisInverseRows<_>>>();
 
     match result {

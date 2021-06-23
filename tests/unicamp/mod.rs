@@ -71,8 +71,8 @@ where
         },
         _ => panic!(),
     }
-    general.standardize();
-    let data = general.derive_matrix_data();
+    let constraint_type_counts = general.standardize();
+    let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<IMT, LUDecomposition<_>>>();
 
     match result {

@@ -258,13 +258,14 @@ where
     /// # Errors
     ///
     /// In case the linear program gets solved during this presolve operation, a solution.
-    pub fn derive_matrix_data(&mut self) -> MatrixData<OF> {
+    pub fn derive_matrix_data(&self, constraint_type_counts: (usize, usize, usize, usize)) -> MatrixData<OF> {
         let (
             nr_equality,
             nr_range,
             nr_upper,
             nr_lower,
-        ) = self.reorder_constraints_by_type();
+        ) = constraint_type_counts;
+        debug_assert_eq!(nr_equality + nr_range + nr_upper + nr_lower, self.nr_constraints());
 
         let ranges = self.constraint_types[nr_equality..(nr_equality + nr_range)].iter()
             .map(|constraint_type| match constraint_type {
@@ -295,6 +296,7 @@ where
     /// * Modifying variables such that they are either free or bounded below by zero (with possibly
     /// an upper bound).
     /// * Multiplying some rows such that the constraint value is non-negative.
+    /// * Reorder the constraints by their type (equal, range, less, greater).
     ///
     /// To do the above, a column major representation of the constraint data is built. This
     /// requires copying all constraint data once.
@@ -304,10 +306,13 @@ where
     /// # Errors
     ///
     /// In case the linear program gets solved during this presolve operation, a solution.
-    pub fn standardize(&mut self) {
+    pub fn standardize(&mut self) -> (usize, usize, usize, usize) {
         self.transform_variables();
         self.make_b_non_negative();
         self.make_minimization_problem();
+        let constraint_type_counts = self.reorder_constraints_by_type();
+
+        constraint_type_counts
     }
 
     /// Recursively analyse constraints and variable bounds and eliminating or tightning these.

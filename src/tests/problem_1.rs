@@ -51,12 +51,12 @@ fn conversion_pipeline() {
     let result = general_form_computed.presolve();
     assert!(result.is_ok());
 
-    general_form_computed.standardize();
+    let constraint_type_counts = general_form_computed.standardize();
     // General form, standardized
     assert_eq!(general_form_computed, general_form_standardized());
 
     // Matrix data form
-    let matrix_data_form_computed = general_form_computed.derive_matrix_data();
+    let matrix_data_form_computed = general_form_computed.derive_matrix_data(constraint_type_counts);
 
     let (constraints, b, variables) = create_matrix_data_data();
     let matrix_data_form_expected = matrix_data_form(&constraints, &b, &variables);
@@ -260,19 +260,19 @@ pub fn general_form() -> GeneralForm<T> {
 
 pub fn general_form_standardized() -> GeneralForm<T> {
     let data = vec![
-        vec![1, 0, 1],
         vec![0, -1, 1],
+        vec![1, 0, 1],
     ];
     let constraints = ColumnMajor::from_test_data(&data, 3);
 
     let constraint_types = vec![
-        RangedConstraintRelation::Greater,
         RangedConstraintRelation::Equal,
+        RangedConstraintRelation::Greater,
     ];
 
     let b = DenseVector::from_test_data(vec![
-        10,
         6,
+        10,
     ]);
 
     let variables = vec![

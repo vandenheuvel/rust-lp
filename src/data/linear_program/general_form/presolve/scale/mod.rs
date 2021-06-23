@@ -1,9 +1,10 @@
+use std::ops::DivAssign;
+
 use num_traits::One;
 
 use crate::data::linear_algebra::traits::{SparseComparator, SparseElement};
-use crate::data::linear_program::general_form::GeneralForm;
 use crate::data::linear_algebra::vector::{SparseVector, Vector};
-use std::ops::DivAssign;
+use crate::data::linear_program::general_form::GeneralForm;
 
 mod rational;
 
@@ -14,7 +15,7 @@ pub trait Scalable<T> {
 }
 
 impl<T: One + SparseElement<T> + SparseComparator + Clone> Scalable<T> for GeneralForm<T> {
-    #[must_use]
+    #[must_use = "The final solution needs to be transformed back using the scaling"]
     default fn scale(&mut self) -> Scaling<T> {
         // TODO(CORRECTNESS): Are these the right sizes?
         Scaling {

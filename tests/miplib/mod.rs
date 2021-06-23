@@ -54,8 +54,8 @@ fn test(file_name: &str, objective: f64, tolerance: f64) {
 
     let mut general = result.try_into().ok().unwrap();
     general.presolve().unwrap();
-    general.standardize();
-    let data = general.derive_matrix_data();
+    let constraint_type_counts = general.standardize();
+    let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<S, BasisInverseRows<_>>>();
 
     match result {

@@ -11,8 +11,8 @@ use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::Carry;
 use relp::algorithm::two_phase::tableau::inverse_maintenance::carry::lower_upper::LUDecomposition;
 use relp::data::linear_program::elements::LinearProgramType;
 use relp::data::linear_program::general_form::GeneralForm;
-use relp::io::import;
 use relp::data::linear_program::general_form::Scalable;
+use relp::io::import;
 
 /// An exact linear program solver written in rust.
 #[derive(Clap)]
@@ -23,7 +23,7 @@ struct Opts {
     /// Disable presolving
     #[clap(long)]
     no_presolve: bool,
-    /// Disable prescaling
+    /// Disable scaling
     #[clap(long)]
     no_scale: bool,
 }
@@ -54,7 +54,7 @@ fn main() {
         }
     }
 
-    general.standardize();
+    let constraint_type_counts = general.standardize();
 
     let scaling = if !opts.no_scale {
         println!("Scaling...");
@@ -62,8 +62,9 @@ fn main() {
     } else {
         None
     };
+    println!("{:?}", scaling);
 
-    let data = general.derive_matrix_data();
+    let data = general.derive_matrix_data(constraint_type_counts);
 
     println!("Solving relaxation...");
     let result = data.solve_relaxation::<Carry<RationalBig, LUDecomposition<_>>>();

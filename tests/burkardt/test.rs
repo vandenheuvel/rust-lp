@@ -42,8 +42,8 @@ fn adlittle() {
 
     let mut general = result.try_into().unwrap();
     general.presolve().unwrap();
-    general.standardize();
-    let data = general.derive_matrix_data();
+    let constraint_type_counts = general.standardize();
+    let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<S, BasisInverseRows<_>>>();
 
     match result {
@@ -63,8 +63,8 @@ fn afiro() {
 
     let mut general = to_general_form::<T>("afiro");
     general.presolve().unwrap();
-    general.standardize();
-    let data = general.derive_matrix_data();
+    let constraint_type_counts = general.standardize();
+    let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<_, LUDecomposition<S>>>();
 
     match result {
@@ -131,8 +131,8 @@ fn maros() {
 
     let mut general = to_general_form::<T>("maros");
     general.presolve().unwrap();
-    general.standardize();
-    let data = general.derive_matrix_data();
+    let constraint_type_counts = general.standardize();
+    let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<S, LUDecomposition<_>>>();
 
     match result {
@@ -160,8 +160,8 @@ fn nazareth() {
 
     let mut general = to_general_form::<T>("nazareth");
     general.presolve().unwrap();
-    general.standardize();
-    let data = general.derive_matrix_data();
+    let constraint_type_counts = general.standardize();
+    let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<S, LUDecomposition<_>>>();
     assert_eq!(result, OptimizationResult::Unbounded);  // GLPK
 }
@@ -173,8 +173,8 @@ fn testprob() {
 
     let mut general = to_general_form::<T>("testprob");
     general.presolve().unwrap();
-    general.standardize();
-    let data = general.derive_matrix_data();
+    let constraint_type_counts = general.standardize();
+    let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<S, LUDecomposition<_>>>();
 
     match result {
