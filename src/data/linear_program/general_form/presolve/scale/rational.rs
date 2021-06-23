@@ -507,8 +507,9 @@ impl<R: NonZeroFactorizable<Power: Zero + Ord>> GeneralFormFactorization<R> {
                 .chain(self.bounds[j].0.iter().map(|factorization| (R::Power::zero(), factorization)))
                 .chain(self.bounds[j].1.iter().map(|factorization| (R::Power::zero(), factorization)))
                 .map(|(increment, factorization)| {
-                increment + self.initial_exponent(factorization)
-            }).collect::<Vec<_>>();
+                    increment + self.initial_exponent(factorization)
+                })
+                .collect::<Vec<_>>();
             powers.sort_unstable();
             let middle = powers.len() / 2;
             debug_assert!(!powers.is_empty(), "At least one element per column (even if zero).");
@@ -867,7 +868,7 @@ mod test {
                     lower_bound: Some(R8!(0)),
                     upper_bound: Some(R8!(6)),
                     shift: R8!(0),
-                    flipped: false
+                    flipped: false,
                 },
                 Variable {
                     variable_type: VariableType::Continuous,
@@ -875,7 +876,7 @@ mod test {
                     lower_bound: Some(R8!(1)),
                     upper_bound: Some(R8!(2)),
                     shift: R8!(0),
-                    flipped: false
+                    flipped: false,
                 },
             ],
             vec!["x".to_string(), "y".to_string()],
