@@ -28,6 +28,7 @@ impl<T: One + SparseElement<T> + SparseComparator + Clone> Scalable<T> for Gener
     }
 
     default fn scale_back(&mut self, _scale_info: Scaling<T>) {
+        println!("not scaling back");
         // TODO(LOGGING): Log that no scaling is done.
         // TODO(FLOAT): Write the scaling implementation here.
     }
@@ -47,6 +48,9 @@ impl<F> Scaling<F> {
         S: SparseElement<S> + SparseComparator,
     {
         for (j, value) in vector.iter_values_mut() {
+            if *j >= self.constraint_column_factors.len() {
+                break;
+            }
             *value /= &self.constraint_column_factors[*j];
         }
     }

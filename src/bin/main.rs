@@ -35,7 +35,7 @@ fn main() {
     println!("Reading problem file: \"{}\"...", path.to_string_lossy());
 
     let mps = import(path)
-        .expect("Couldn't parse the file.");
+        .expect("Couldn't parse the file");
 
     let mut general: GeneralForm<RationalBig> = mps.try_into()
         .expect("Problem is inconsistent");
@@ -71,11 +71,11 @@ fn main() {
 
     println!("Solution computed:");
     match result {
-        OptimizationResult::FiniteOptimum(mut vector) => {
+        OptimizationResult::FiniteOptimum(vector) => {
+            let mut reconstructed = data.reconstruct_solution(vector);
             if let Some(scaling) = scaling {
-                scaling.scale_back(&mut vector);
+                scaling.scale_back(&mut reconstructed);
             }
-            let reconstructed = data.reconstruct_solution(vector);
             let solution = general.compute_full_solution_with_reduced_solution(reconstructed);
             println!("{}", solution.to_string());
         },

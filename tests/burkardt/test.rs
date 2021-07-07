@@ -140,12 +140,12 @@ fn maros() {
             let reconstructed = data.reconstruct_solution(vector);
             let solution = general.compute_full_solution_with_reduced_solution(reconstructed);
             assert_eq!(solution, Solution::new(
-                S::new(385, 3),  // GLPK
+                S::new(385, 3).unwrap(),  // GLPK
                 vec![
-                    ("VOL1".to_string(), S::new(10, 3)),
-                    ("VOL2".to_string(), S::new(40, 3)),
-                    ("VOL3".to_string(), S::new(20, 1)),
-                    ("VOL4".to_string(), S::new(0, 1)),
+                    ("VOL1".to_string(), S::new(10, 3).unwrap()),
+                    ("VOL2".to_string(), S::new(40, 3).unwrap()),
+                    ("VOL3".to_string(), S::new(20, 1).unwrap()),
+                    ("VOL4".to_string(), S::new(0, 1).unwrap()),
                 ],
             ));
         },
@@ -182,11 +182,11 @@ fn testprob() {
             let reconstructed = data.reconstruct_solution(vector);
             let solution = general.compute_full_solution_with_reduced_solution(reconstructed);
             assert_eq!(solution, Solution::new(
-                S::new(54, 1),  // GLPK
+                S::new(54, 1).unwrap(),  // GLPK
                 vec![
-                    ("X1".to_string(), S::new(4, 1)),
-                    ("X2".to_string(), S::new(-1, 1)),
-                    ("X3".to_string(), S::new(6, 1)),
+                    ("X1".to_string(), S::new(4, 1).unwrap()),
+                    ("X2".to_string(), S::new(-1, 1).unwrap()),
+                    ("X3".to_string(), S::new(6, 1).unwrap()),
                 ],
             ));
         },

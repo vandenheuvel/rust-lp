@@ -174,6 +174,7 @@ pub mod test {
     }
 
     /// Test
+    #[allow(unused_must_use)]
     fn out_of_bounds_get<F: Field + NonZero + From<u8> + FromPrimitive, V: TestVector<F>>() {
         let v = get_test_vector::<F, V>();
 

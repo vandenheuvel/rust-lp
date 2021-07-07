@@ -122,7 +122,7 @@ impl TryFrom<&str> for Raw {
 mod test {
     use std::convert::TryFrom;
 
-    use relp_num::Rational64;
+    use relp_num::{R64, Rational64};
     use relp_num::Sign;
 
     use crate::io::mps::number::parse::Raw;
@@ -227,79 +227,79 @@ mod test {
             sign: Sign::Positive,
             integer: 1,
             decimal_steps_from_right: 0,
-        }), Rational64::new(1, 1));
+        }), R64!(1));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Positive,
             integer: 2,
             decimal_steps_from_right: 0,
-        }), Rational64::new(2, 1));
+        }), R64!(2));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Positive,
             integer: 3,
             decimal_steps_from_right: 1,
-        }), Rational64::new(3, 10));
+        }), R64!(3, 10));
 
         // sign
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Negative,
             integer: 1,
             decimal_steps_from_right: 0,
-        }), Rational64::new(-1, 1));
+        }), R64!(-1, 1));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Negative,
             integer: 2,
             decimal_steps_from_right: 0,
-        }), Rational64::new(-2, 1));
+        }), R64!(-2, 1));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Negative,
             integer: 3,
             decimal_steps_from_right: 1,
-        }), Rational64::new(-3, 10));
+        }), R64!(-3, 10));
 
         // dot location, multiple digits
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Positive,
             integer: 16456,
             decimal_steps_from_right: 0,
-        }), Rational64::new(16456, 1));
+        }), R64!(16456, 1));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Positive,
             integer: 64_896_848,
             decimal_steps_from_right: 0,
-        }), Rational64::new(64_896_848, 1));
+        }), R64!(64_896_848, 1));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Positive,
             integer: 984_654_684,
             decimal_steps_from_right: 9,
-        }), Rational64::new(246_163_671, 250_000_000));
+        }), R64!(246_163_671, 250_000_000));
 
         // multiple digits, both sides
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Positive,
             integer: 12,
             decimal_steps_from_right: 1,
-        }), Rational64::new(12, 10));
+        }), R64!(12, 10));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Positive,
             integer: 123_456_789,
             decimal_steps_from_right: 5,
-        }), Rational64::new(123_456_789, 100_000));
+        }), R64!(123_456_789, 100_000));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Positive,
             integer: 124_654,
             decimal_steps_from_right: 5,
-        }), Rational64::new(62327, 50_000));
+        }), R64!(62_327, 50_000));
 
         // Zero
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Zero,
             integer: 0,
             decimal_steps_from_right: 0,
-        }), Rational64::new(0, 1));
+        }), R64!(0, 1));
         assert_eq!(Rational64::from(Raw {
             sign: Sign::Zero,
             integer: 0,
             decimal_steps_from_right: 1,
-        }), Rational64::new(0, 1));
+        }), R64!(0, 1));
     }
 }

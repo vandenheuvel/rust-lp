@@ -14,7 +14,10 @@ use relp::data::linear_program::general_form::{GeneralForm, Scalable};
 use relp::data::linear_program::solution::Solution;
 use relp::io::error::Import;
 use relp::io::mps::parse_fixed;
-use relp_num::RationalBig;
+use relp_num::{RationalBig, NonZeroFactorizable};
+use std::ops::{MulAssign, DivAssign, Mul, Neg, Sub, Add, AddAssign, Div};
+use num_traits::{One, Zero};
+use std::hash::Hash;
 
 /// # Generation and execution
 #[allow(missing_docs)]
@@ -56,7 +59,10 @@ fn solve(file_name: &str) -> Solution<S> {
     let mut general: GeneralForm<T> = mps.try_into().unwrap();
     general.presolve().unwrap();
     let constraint_type_counts = general.standardize();
-    general.scale();
+    let scaling = Scalable::<S>::scale(&mut general);
+    f::<S>();
+
+    println!("{:?}", scaling);
     let data = general.derive_matrix_data(constraint_type_counts);
     let result = data.solve_relaxation::<Carry<S, BasisInverseRows<_>>>();
 
@@ -67,4 +73,29 @@ fn solve(file_name: &str) -> Solution<S> {
         },
         _ => panic!(),
     }
+}
+use relp::data::linear_algebra::traits::SparseElement;
+use relp::data::linear_algebra::traits::SparseComparator;
+fn f<R>()
+where
+    for<'r> R:
+        NonZeroFactorizable +
+        MulAssign<R::Factor> +
+        DivAssign<R::Factor> +
+        MulAssign<&'r R::Factor> +
+        DivAssign<&'r R::Factor> +
+        MulAssign<R> +
+        DivAssign<R> +
+        MulAssign<&'r R> +
+        DivAssign<&'r R> +
+        Mul<&'r R, Output=R> +
+        One +
+        SparseElement<R> +
+        SparseComparator +
+    ,
+    for<'r> &'r R: Mul<&'r R, Output=R>,
+    R::Factor: Hash,
+    R::Power: Neg<Output=R::Power> + Sub<Output=R::Power> + Add<Output=R::Power> + Zero + One + AddAssign + Ord,
+    for<'r> &'r R: Div<&'r R, Output=R>,
+{
 }
